@@ -19,7 +19,7 @@ contract Raffle {
     
     RaffleState public raffleState; //type RaffleState - variable stores raffle's state
 
-    bytes10 public raffleName;
+    bytes10 public immutable raffleName;
     uint public startTime;
     uint public raffleDuration;
     address payable owner;
