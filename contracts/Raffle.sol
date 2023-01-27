@@ -19,18 +19,16 @@ contract Raffle {
     
     RaffleState public raffleState; //type RaffleState - variable stores raffle's state
 
-    bytes10 public immutable raffleName;
     uint public startTime;
     uint public raffleDuration;
-    address payable owner;
+    address payable immutable owner;
     uint public immutable entranceFee;
     uint public immutable minimumTickets;
     address payable[] public players;
 
     event RaffleEnter(address indexed player);
 
-    constructor(bytes8 _raffleName, uint _raffleDuration, uint _entranceFee, uint _minimumTickets) {
-        raffleName = _raffleName;
+    constructor(uint _raffleDuration, uint _entranceFee, uint _minimumTickets) {
         startTime = block.timestamp;
         raffleDuration = _raffleDuration;
         owner = payable(msg.sender);
