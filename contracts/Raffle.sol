@@ -2,10 +2,12 @@
 
 pragma solidity ^0.8.7;
 
-error Raffle__SendMoreToEnterRaffle(); //custom errors - require is expensive
+// Custom Errors
+error Raffle__SendMoreToEnterRaffle();
 error Raffle__RaffleClosed();
 error Raffle__RaffleOpen();
 error Raffle__RaffleNotFilled();
+error Raffle__OnlyOwnerCanAccess();
 
 contract Raffle {
     
@@ -14,20 +16,23 @@ contract Raffle {
         Closed,
         Calculating
     }
+    
     RaffleState public raffleState; //type RaffleState - variable stores raffle's state
 
-    bytes10 raffleName;
-    uint startTime;
+    bytes10 public raffleName;
+    uint public startTime;
+    uint public raffleDuration;
     address payable owner;
     uint public immutable entranceFee;
-    uint public minimumTickets;
+    uint public immutable minimumTickets;
     address payable[] public players;
 
     event RaffleEnter(address indexed player);
 
-    constructor(bytes8 _raffleName, uint _entranceFee, uint _minimumTickets) {
+    constructor(bytes8 _raffleName, uint _raffleDuration, uint _entranceFee, uint _minimumTickets) {
         raffleName = _raffleName;
         startTime = block.timestamp;
+        raffleDuration = _raffleDuration;
         owner = payable(msg.sender);
         entranceFee = _entranceFee;
         minimumTickets = _minimumTickets;
@@ -52,15 +57,17 @@ contract Raffle {
     }
 
     modifier onlyOwner {
-        require(msg.sender == owner, "Only available to lottery owner");
+        if (msg.sender != owner) {
+            revert Raffle__OnlyOwnerCanAccess();
+        }
         _;
     }
 
     function runRaffle() public {} //VRF picks winner if minimum entries are met and time ends
 
-    function claimPrize() external {} //winner claims prize if raffle successfully completes
+    function claimPrize() external {} //winner claims prize after raffle runs
 
-    function refundPlayers() external {} //if raffle fails, winners receive refunds
+    function refundPlayers() external {} //if raffle fails, winners  can receive refunds
 
-    function refundOwner() onlyOwner external {} //if raffle fails, owner withdraws asset
+    function refundOwner() onlyOwner external {} //if raffle fails, owner can withdraw asset
 }
