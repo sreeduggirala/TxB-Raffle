@@ -1,0 +1,23 @@
+{
+  "name": "txb-lottery",
+  "version": "1.0.0",
+  "description": "This repository contains the smart contracts source code for a decentralized lottery application powered by VRFs commissioned by Shardeum (in early development).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sreeduggirala/TxB-Lottery.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sreeduggirala/TxB-Lottery/issues"
+  },
+  "homepage": "https://github.com/sreeduggirala/TxB-Lottery#readme",
+  "devDependencies": {
+    "hardhat": "^2.12.6"
+  }
+}
