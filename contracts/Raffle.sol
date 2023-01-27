@@ -19,32 +19,31 @@ contract Raffle {
     
     RaffleState public raffleState; //type RaffleState - variable stores raffle's state
 
+    address payable immutable owner;
+    uint public raffleID;
+    uint public immutable entranceFee;
+    uint public immutable maxEntries;
     uint public startTime;
     uint public raffleDuration;
-    address payable immutable owner;
-    uint public immutable entranceFee;
-    uint public immutable minimumTickets;
+    
     address payable[] public players;
-    uint public raffleID;
 
     event RaffleEnter(address indexed player);
+    event RaffleWinner(address indexed winner);
 
-    constructor(uint _raffleDuration, uint _entranceFee, uint _minimumTickets) {
+    constructor(uint _raffleDuration, uint _entranceFee, uint _maxEntries) {
+        owner = payable(msg.sender);
+        raffleID++;
+        entranceFee = _entranceFee;
+        maxEntries = _maxEntries;
         startTime = block.timestamp;
         raffleDuration = _raffleDuration;
-        owner = payable(msg.sender);
-        entranceFee = _entranceFee;
-        minimumTickets = _minimumTickets;
-        raffleID += 1;
-
     }
 
-    function depositAsset() public payable onlyOwner { //owner sends NFT to contract
+    //owner sends NFT to contract after or during creation of raffle
 
-    }
-
-    function enterRaffle() external payable { //depositAsset has to receive NFT; users cannot enter empty raffle
-        if(msg.value < entranceFee) {
+    function enterRaffle(uint _numTickets) external payable { //depositAsset has to receive NFT; users cannot enter empty raffle
+        if(msg.value < entranceFee * _numTickets) {
             revert Raffle__SendMoreToEnterRaffle();
         }
 
@@ -52,7 +51,9 @@ contract Raffle {
             revert Raffle__RaffleClosed();
         }
 
-        players.push(payable(msg.sender));
+        for (uint256 i = 0; i < _numTickets; i++) {
+            players.push(payable(msg.sender));
+        }
         emit RaffleEnter(msg.sender);
     }
 
@@ -67,7 +68,7 @@ contract Raffle {
 
     function claimPrize() external {} //winner claims prize after raffle runs
 
-    function refundPlayers() external {} //if raffle fails, winners  can receive refunds
+    function refundPlayers() external {} //if raffle fails, winners can receive refunds
 
     function refundOwner() onlyOwner external {} //if raffle fails, owner can withdraw asset
 }
