@@ -25,6 +25,7 @@ contract Raffle {
     uint public immutable entranceFee;
     uint public immutable minimumTickets;
     address payable[] public players;
+    uint public raffleID;
 
     event RaffleEnter(address indexed player);
 
@@ -34,6 +35,7 @@ contract Raffle {
         owner = payable(msg.sender);
         entranceFee = _entranceFee;
         minimumTickets = _minimumTickets;
+        raffleID += 1;
 
     }
 
