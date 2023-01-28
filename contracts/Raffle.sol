@@ -8,6 +8,8 @@ error Raffle__CannotBuy0Slots();
 error Raffle__RaffleClosed();
 error Raffle__RaffleOpen();
 error Raffle__RaffleNotFilled();
+error Raffle__ContractNotHoldingNFT();
+error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyOwnerCanAccess();
 
 contract Raffle {
@@ -26,6 +28,7 @@ contract Raffle {
     uint public endTime;
     uint public nftID;
     bool holdingNFT;
+    bool winnerSelected;
     address payable[] public players;
 
     event RaffleEntered(address indexed player, uint numClaimed);
@@ -42,8 +45,7 @@ contract Raffle {
 
     //owner sends NFT to contract after or during creation of raffle
 
-    function enterRaffle(uint _numTickets) payable external {
-        //contract has to receive/own NFT; users cannot enter empty raffle
+    function enterRaffle(uint _numTickets) payable external { //contract has to receive/own NFT; users cannot enter empty raffle
         if( _numTickets <= 0) {
             revert Raffle__CannotBuy0Slots();
         }
@@ -70,9 +72,18 @@ contract Raffle {
         _;
     }
 
-    function runRaffle() public {} //VRF picks winner when time ends
+    modifier nftHeld() {
+        if(holdingNFT == false) {
+            revert Raffle__ContractNotHoldingNFT();
+        }
+        _;
+    }
 
-    function claimPrize() external {} //winner claims prize after raffle runs
+    function runRaffle() public {} //VRF selects winner when time ends
 
-    function deleteRaffle() external onlyOwner {} //if raffle fails, winners can receive refunds and owner withdraws refunds
+    function claimPrize() external {} //winner claims prize after winner selection
+
+    function refundPlayer() external {} //players can refund tickets before winner selection
+
+    function deleteRaffle() external onlyOwner {} //only owner can delete raffle before winner selection
 }
