@@ -1,6 +1,6 @@
 # TxB Lottery
 
-TxB Lottery is an asset raffling application with ERC-721 deposit, withdrawal, and disbursement capabilities; random winner selection is ensured by a verifiable random function (VRF). This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's Engineering-as-a-Service cohort at UT Austin).
+TxB Lottery is an asset raffling application with ERC-721 deposit, withdrawal, and disbursement capabilities; random winner selection is ensured via a verifiable random function (VRF). This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's Engineering-as-a-Service cohort at UT Austin).
 
 # Key Features:
 
