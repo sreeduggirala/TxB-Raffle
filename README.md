@@ -1,3 +1,10 @@
 # TxB Lottery
-This repository contains the smart contracts source code for a decentralized lottery application powered by VRFs commissioned by Shardeum (in early development).
 
+TxB Lottery is an asset raffling application with ERC-721 deposit, withdrawal, and disbursement capabilities; random winner selection is ensured by a verifiable random function (VRF). This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's Engineering-as-a-Service cohort at UT Austin).
+
+# Key Features:
+
+1. Owners can intiate NFT raffles with customizable available entries, entry prices, and start/end dates.
+2. User can enter/exit until all slots are filled.
+3. SupraOracle VRF will select winner
+4. Prior to winner selection, owners can delete a raffle
