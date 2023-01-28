@@ -23,19 +23,19 @@ contract Raffle {
     uint public immutable entranceFee;
     uint public immutable maxEntries;
     uint public startTime;
-    uint public raffleDuration;
+    uint public endTime;
     address payable[] public players;
 
     event RaffleEnter(address indexed player);
     event RaffleWinner(address indexed winner);
 
-    constructor(uint _raffleDuration, uint _entranceFee, uint _maxEntries) {
+    constructor(uint _entranceFee, uint _maxEntries, uint _startTime, uint _endTime) {
         owner = payable(msg.sender);
         raffleID++;
         entranceFee = _entranceFee;
         maxEntries = _maxEntries;
-        startTime = block.timestamp;
-        raffleDuration = _raffleDuration;
+        startTime = _startTime;
+        endTime = _endTime;
     }
 
     //owner sends NFT to contract after or during creation of raffle
@@ -50,7 +50,7 @@ contract Raffle {
             revert Raffle__RaffleClosed();
         }
 
-        for (uint256 i = 0; i < _numTickets; i++) {
+        for (uint i = 0; i < _numTickets; i++) {
             players.push(payable(msg.sender));
         }
 
@@ -68,5 +68,5 @@ contract Raffle {
 
     function claimPrize() external {} //winner claims prize after raffle runs
 
-    function refundPlayers() external {} //if raffle fails, winners can receive refunds and owner withdraws refunds
+    function deleteRaffle() external onlyOwner {} //if raffle fails, winners can receive refunds and owner withdraws refunds
 }

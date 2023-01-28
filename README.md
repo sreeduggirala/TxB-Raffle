@@ -4,7 +4,7 @@ TxB Lottery is an asset raffling application with ERC-721 deposit, withdrawal, a
 
 # Key Features:
 
-1. Owners can intiate NFT raffles with customizable entry limits, entry prices, and start/end dates.
+1. Owners can intiate NFT raffles with customizable number of entry limits, entry prices, and start/end dates.
 2. User can enter/exit until all slots are filled.
 3. SupraOracle VRF will select winner
 4. Prior to winner selection, owners can delete a raffle
