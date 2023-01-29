@@ -8,8 +8,9 @@ error Raffle__CannotBuy0Slots();
 error Raffle__ContractNotHoldingNFT();
 error Raffle__RaffleOpen();
 error Raffle__RaffleClosed();
-error Raffle__RaffleFilled();
-error Raffle__RaffleNotFilled();
+error Raffle__InsufficientTicketsLeft();
+error Raffle__RaffleFull();
+error Raffle__RaffleNotFull();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyOwnerCanAccess();
 
@@ -30,14 +31,14 @@ contract Raffle {
     uint public endTime;
     address nftContract;
     uint public nftID;
-    bool holdingNFT;
+    bool holdingNFT = false;
 
     // Player Content
     address payable[] public players;
     mapping(address => uint) playerTickets;
 
     // Events
-    event RaffleEntered(address indexed player, uint numClaimed);
+    event RaffleEntered(address indexed player, uint numPurchased);
     event RaffleRefunded(address indexed player, uint numRefunded);
     event RaffleWinner(address indexed winner);
 
@@ -51,17 +52,21 @@ contract Raffle {
 
     //owner needs to send NFT to contract after creation of raffle
 
-    function enterRaffle(uint _numTickets) payable external { //contract has to receive/own NFT; users cannot enter empty raffle
+    function enterRaffle(uint _numTickets) payable external nftHeld { //contract has to receive/own NFT; users cannot enter empty raffle
         if( _numTickets <= 0) {
             revert Raffle__CannotBuy0Slots();
-        }
-
-        if(holdingNFT == false) {
-            revert Raffle__ContractNotHoldingNFT();
         }
         
         if (msg.value < ticketFee * _numTickets) {
             revert Raffle__SendMoreToEnterRaffle();
+        }
+
+        if(maxTickets - players.length < _numTickets) {
+            revert Raffle__InsufficientTicketsLeft();
+        }
+
+        if(players.length == _numTickets) {
+            revert Raffle__RaffleFull();
         }
 
         if (raffleState != RaffleState.Open) {
@@ -93,7 +98,5 @@ contract Raffle {
 
     function disbursement() external {} //winner and owner receive respective assets
 
-    function refundPlayer() external {} //players can refund tickets before winner selection
-
-    function deleteRaffle() external onlyOwner {} //only owner can delete raffle before winner selection
+    function deleteRaffle() external onlyOwner nftHeld {} //only owner can delete raffle before winner selection; NFT gets transferred to owner and players receive refunds
 }
