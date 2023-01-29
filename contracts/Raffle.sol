@@ -5,10 +5,11 @@ pragma solidity ^0.8.7;
 // Custom Errors
 error Raffle__SendMoreToEnterRaffle();
 error Raffle__CannotBuy0Slots();
-error Raffle__RaffleClosed();
-error Raffle__RaffleOpen();
-error Raffle__RaffleNotFilled();
 error Raffle__ContractNotHoldingNFT();
+error Raffle__RaffleOpen();
+error Raffle__RaffleClosed();
+error Raffle__RaffleFilled();
+error Raffle__RaffleNotFilled();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyOwnerCanAccess();
 
@@ -21,6 +22,7 @@ contract Raffle {
 
     RaffleState public raffleState;
 
+    // Raffle Content
     address payable immutable owner;
     uint public immutable ticketFee;
     uint public immutable maxTickets;
@@ -29,10 +31,12 @@ contract Raffle {
     address nftContract;
     uint public nftID;
     bool holdingNFT;
-    
+
+    // Player Content
     address payable[] public players;
     mapping(address => uint) playerTickets;
 
+    // Events
     event RaffleEntered(address indexed player, uint numClaimed);
     event RaffleRefunded(address indexed player, uint numRefunded);
     event RaffleWinner(address indexed winner);
@@ -45,11 +49,15 @@ contract Raffle {
         endTime = _endTime;
     }
 
-    //owner sends NFT to contract after or during creation of raffle
+    //owner needs to send NFT to contract after creation of raffle
 
     function enterRaffle(uint _numTickets) payable external { //contract has to receive/own NFT; users cannot enter empty raffle
         if( _numTickets <= 0) {
             revert Raffle__CannotBuy0Slots();
+        }
+
+        if(holdingNFT == false) {
+            revert Raffle__ContractNotHoldingNFT();
         }
         
         if (msg.value < ticketFee * _numTickets) {
