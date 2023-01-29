@@ -22,23 +22,25 @@ contract Raffle {
     RaffleState public raffleState;
 
     address payable immutable owner;
-    uint public immutable entranceFee;
-    uint public immutable maxEntries;
+    uint public immutable ticketFee;
+    uint public immutable maxTickets;
     uint public startTime;
     uint public endTime;
+    address nftContract;
     uint public nftID;
     bool holdingNFT;
-    bool winnerSelected;
+    
     address payable[] public players;
+    mapping(address => uint) playerTickets;
 
     event RaffleEntered(address indexed player, uint numClaimed);
     event RaffleRefunded(address indexed player, uint numRefunded);
     event RaffleWinner(address indexed winner);
 
-    constructor(uint _entranceFee, uint _maxEntries, uint _startTime, uint _endTime) {
+    constructor(uint _ticketFee, uint _maxTickets, uint _startTime, uint _endTime) {
         owner = payable(msg.sender);
-        entranceFee = _entranceFee;
-        maxEntries = _maxEntries;
+        ticketFee = _ticketFee;
+        maxTickets = _maxTickets;
         startTime = _startTime;
         endTime = _endTime;
     }
@@ -50,7 +52,7 @@ contract Raffle {
             revert Raffle__CannotBuy0Slots();
         }
         
-        if (msg.value < entranceFee * _numTickets) {
+        if (msg.value < ticketFee * _numTickets) {
             revert Raffle__SendMoreToEnterRaffle();
         }
 
@@ -81,7 +83,7 @@ contract Raffle {
 
     function runRaffle() public {} //VRF selects winner when time ends
 
-    function claimPrize() external {} //winner claims prize after winner selection
+    function disbursement() external {} //winner and owner receive respective assets
 
     function refundPlayer() external {} //players can refund tickets before winner selection
 
