@@ -33,6 +33,8 @@ contract Raffle {
     uint public nftID;
     bool holdingNFT = false;
 
+    //Chainlink Content
+
     // Player Content
     address payable[] public players;
     mapping(address => uint) playerTickets;
@@ -96,7 +98,23 @@ contract Raffle {
 
     function runRaffle() public {} //VRF selects winner when time ends
 
-    function disbursement() external {} //winner and owner receive respective assets
+    function disbursement() external nftHeld {
+        //transfer 97.5% of raffle pool to owner
+        //find NFT winner
+        //transfer NFT to winner
+        //holdingNFT = false;
+        //raffle winner event emit
+    }
 
-    function deleteRaffle() external onlyOwner nftHeld {} //only owner can delete raffle before winner selection; NFT gets transferred to owner and players receive refunds
+    function deleteRaffle() external onlyOwner nftHeld {
+        //cannot delete raffle after winner has been selected
+        //transfer NFT to original owner
+
+        holdingNFT = false;
+
+        for(uint i = (players.length) - 1; i >= 0; i--) {
+            payable(players[i]).transfer(ticketFee);
+            players.pop();
+        }
+    } //only owner can delete raffle before winner selection; NFT gets transferred to owner and players receive refunds
 }
