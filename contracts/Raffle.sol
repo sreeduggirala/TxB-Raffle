@@ -103,7 +103,7 @@ contract Raffle {
         //find NFT winner
         //transfer NFT to winner
         //holdingNFT = false;
-        //raffle winner event emit
+        //emit raffle winner event
     }
 
     function deleteRaffle() external onlyOwner nftHeld {
