@@ -25,26 +25,28 @@ contract Raffle {
 
     // Raffle Content
     address payable immutable owner;
-    uint public immutable ticketFee;
-    uint public immutable maxTickets;
-    uint public startTime;
-    uint public endTime;
+    uint256 public immutable ticketFee;
+    uint256 public immutable maxTickets;
+    uint256 public startTime;
+    uint256 public endTime;
     address nftContract;
-    uint public nftID;
-    bool holdingNFT = false;
+    uint256 public nftID;
+    bool holdingNFT;
 
     //Chainlink Content
+    uint256 vrfNumber; //resulting number from VRF
+    bool public vrfRequested;
 
     // Player Content
     address payable[] public players;
-    mapping(address => uint) playerTickets;
+    mapping(address => uint256) playerTickets;
 
     // Events
-    event RaffleEntered(address indexed player, uint numPurchased);
-    event RaffleRefunded(address indexed player, uint numRefunded);
+    event RaffleEntered(address indexed player, uint256 numPurchased);
+    event RaffleRefunded(address indexed player, uint256 numRefunded);
     event RaffleWinner(address indexed winner);
 
-    constructor(uint _ticketFee, uint _maxTickets, uint _startTime, uint _endTime) {
+    constructor(uint256 _ticketFee, uint256 _maxTickets, uint256 _startTime, uint256 _endTime) {
         owner = payable(msg.sender);
         ticketFee = _ticketFee;
         maxTickets = _maxTickets;
@@ -54,7 +56,7 @@ contract Raffle {
 
     //owner needs to send NFT to contract after creation of raffle
 
-    function enterRaffle(uint _numTickets) payable external nftHeld { //contract has to receive/own NFT; users cannot enter empty raffle
+    function enterRaffle(uint256 _numTickets) payable external nftHeld { //contract has to receive/own NFT; users cannot enter empty raffle
         if( _numTickets <= 0) {
             revert Raffle__CannotBuy0Slots();
         }
@@ -75,9 +77,11 @@ contract Raffle {
             revert Raffle__RaffleClosed();
         }
 
-        for (uint i = 0; i < _numTickets; i++) {
+        for (uint256 i = 0; i < _numTickets; i++) {
             players.push(payable(msg.sender));
         }
+
+        playerTickets[msg.sender] += _numTickets;
 
         emit RaffleEntered(msg.sender, _numTickets);
     }
@@ -100,8 +104,7 @@ contract Raffle {
 
     function disbursement() external nftHeld {
         //transfer 97.5% of raffle pool to owner
-        //find NFT winner
-        //transfer NFT to winner
+        //find NFT winner (VRF number % players.length == winner's index)
         //holdingNFT = false;
         //emit raffle winner event
     }
@@ -112,7 +115,7 @@ contract Raffle {
 
         holdingNFT = false;
 
-        for(uint i = (players.length) - 1; i >= 0; i--) {
+        for(uint256 i = (players.length) - 1; i >= 0; i--) {
             payable(players[i]).transfer(ticketFee);
             players.pop();
         }
