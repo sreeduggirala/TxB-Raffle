@@ -5,25 +5,14 @@ pragma solidity ^0.8.7;
 // Custom Errors
 error Raffle__SendMoreToEnterRaffle();
 error Raffle__CannotBuy0Slots();
-error Raffle__ContractNotHoldingNFT();
-error Raffle__RaffleOpen();
-error Raffle__RaffleClosed();
-error Raffle__InsufficientTicketsLeft();
 error Raffle__RaffleFull();
-error Raffle__RaffleNotFull();
+error Raffle__ContractNotHoldingNFT();
+error Raffle__InsufficientTicketsLeft();
 error Raffle__VRFNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyOwnerCanAccess();
 
 contract Raffle {
-    enum RaffleState {
-        Open,
-        Closed,
-        Calculating
-    }
-
-    RaffleState public raffleState;
-
     // Raffle Content
     address payable immutable owner;
     uint256 public immutable ticketFee;
@@ -55,12 +44,12 @@ contract Raffle {
 
     //owner needs to send NFT to contract after creation of raffle
 
-    function enterRaffle(uint256 _numTickets) payable external nftHeld { //contract has to receive/own NFT; users cannot enter empty raffle
-        if( _numTickets <= 0) {
+    function enterRaffle(uint256 _numTickets) payable external nftHeld vrfCalled { //contract has to receive/own NFT; users cannot enter empty raffle
+        if(_numTickets <= 0) {
             revert Raffle__CannotBuy0Slots();
         }
         
-        if (msg.value < ticketFee * _numTickets) {
+        if(msg.value < ticketFee * _numTickets) {
             revert Raffle__SendMoreToEnterRaffle();
         }
 
@@ -68,15 +57,11 @@ contract Raffle {
             revert Raffle__InsufficientTicketsLeft();
         }
 
-        if(players.length == _numTickets) {
+        if(players.length == maxTickets) {
             revert Raffle__RaffleFull();
         }
 
-        if (raffleState != RaffleState.Open) {
-            revert Raffle__RaffleClosed();
-        }
-
-        for (uint256 i = 0; i < _numTickets; i++) {
+        for(uint256 i = 0; i < _numTickets; i++) {
             players.push(payable(msg.sender));
         }
 
@@ -86,7 +71,7 @@ contract Raffle {
     }
 
     modifier onlyOwner() {
-        if (msg.sender != owner) {
+        if(msg.sender != owner) {
             revert Raffle__OnlyOwnerCanAccess();
         }
         _;
@@ -97,6 +82,13 @@ contract Raffle {
             revert Raffle__ContractNotHoldingNFT();
         }
         _;
+    }
+
+    modifier vrfCalled() {
+        if(vrfRequested == true) {
+            revert Raffle__WinnerAlreadySelected();
+            _;
+        }
     }
 
     function runRaffle() public {} //VRF selects winner when time ends
@@ -113,10 +105,7 @@ contract Raffle {
         emit RaffleWinner(winner);
     }
 
-    function deleteRaffle() external onlyOwner nftHeld {
-        if(vrfRequested == true) {
-            revert Raffle__WinnerAlreadySelected();
-        }
+    function deleteRaffle() external onlyOwner nftHeld vrfCalled {
         //transfer NFT to original owner
 
         holdingNFT = false;
