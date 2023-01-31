@@ -11,6 +11,7 @@ error Raffle__RaffleClosed();
 error Raffle__InsufficientTicketsLeft();
 error Raffle__RaffleFull();
 error Raffle__RaffleNotFull();
+error Raffle__VRFNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyOwnerCanAccess();
 
@@ -103,10 +104,15 @@ contract Raffle {
     function runRaffle() public {} //VRF selects winner when time ends
 
     function disbursement() external nftHeld {
-        //transfer 97.5% of raffle pool to owner
-        //find NFT winner (VRF number % players.length == winner's index)
-        //holdingNFT = false;
-        //emit raffle winner event
+        if(vrfNumber == 0) {
+            revert Raffle__VRFNumberStillLoading();
+        }
+
+        payable(owner).transfer((address(this).balance * 98)/100);
+        address winner = players[vrfNumber % players.length];
+        //transfer NFT to winner
+        holdingNFT = false;
+        emit RaffleWinner(winner);
     }
 
     function deleteRaffle() external onlyOwner nftHeld {
