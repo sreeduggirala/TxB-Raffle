@@ -30,12 +30,10 @@ contract Raffle {
     uint256 public immutable maxTickets;
     uint256 public startTime;
     uint256 public endTime;
-    address nftContract;
-    uint256 public nftID;
     bool holdingNFT;
 
     //Chainlink Content
-    uint256 vrfNumber; //resulting number from VRF
+    uint256 vrfNumber;
     bool public vrfRequested;
 
     // Player Content
@@ -116,7 +114,9 @@ contract Raffle {
     }
 
     function deleteRaffle() external onlyOwner nftHeld {
-        //cannot delete raffle after winner has been selected
+        if(vrfRequested == true) {
+            revert Raffle__WinnerAlreadySelected();
+        }
         //transfer NFT to original owner
 
         holdingNFT = false;
@@ -125,5 +125,7 @@ contract Raffle {
             payable(players[i]).transfer(ticketFee);
             players.pop();
         }
-    } //only owner can delete raffle before winner selection; NFT gets transferred to owner and players receive refunds
+    }
+
+    function receiveNFT() external {}
 }
