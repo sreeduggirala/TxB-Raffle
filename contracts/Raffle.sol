@@ -42,7 +42,7 @@ contract Raffle {
         endTime = _endTime;
     }
 
-    function enterRaffle(uint256 _numTickets) payable external nftHeld vrfCalled { //contract has to receive/own NFT; users cannot enter empty raffle
+    function enterRaffle(uint256 _numTickets) payable external nftHeld { //contract has to receive/own NFT; users cannot enter empty raffle
         if(_numTickets <= 0) {
             revert Raffle__CannotBuy0Slots();
         }
@@ -83,7 +83,7 @@ contract Raffle {
     }
 
     modifier vrfCalled() {
-        if(vrfRequested == true) {
+        if(vrfRequested == false) {
             revert Raffle__WinnerAlreadySelected();
             _;
         }
@@ -103,7 +103,7 @@ contract Raffle {
         emit RaffleWinner(winner);
     }
 
-    function deleteRaffle() external onlyOwner nftHeld vrfCalled {
+    function deleteRaffle() external onlyOwner nftHeld {
         //transfer NFT to original owner
 
         holdingNFT = false;
