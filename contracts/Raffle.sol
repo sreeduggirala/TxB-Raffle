@@ -27,7 +27,7 @@ contract Raffle {
 
     // Player Content
     address payable[] public players;
-    mapping(address => uint256) playerTickets;
+    mapping(address => uint256) public playerTickets;
 
     // Events
     event RaffleEntered(address indexed player, uint256 numPurchased);
@@ -41,8 +41,6 @@ contract Raffle {
         startTime = _startTime;
         endTime = _endTime;
     }
-
-    //owner needs to send NFT to contract after creation of raffle
 
     function enterRaffle(uint256 _numTickets) payable external nftHeld vrfCalled { //contract has to receive/own NFT; users cannot enter empty raffle
         if(_numTickets <= 0) {
