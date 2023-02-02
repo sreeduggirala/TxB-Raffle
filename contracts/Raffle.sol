@@ -108,7 +108,9 @@ contract Raffle {
             }
 
             else {
-                //remove players[i] and refund player for ticket
+                players[i] = players[players.length - 1];
+                players.pop();
+                payable(msg.sender).transfer(ticketFee);
             }
         }
     }
@@ -132,13 +134,13 @@ contract Raffle {
 
         holdingNFT = false;
 
-        for(uint256 i = (players.length) - 1; i >= 0; i--) {
+        for(uint256 i = players.length - 1; i >= 0; i--) {
             payable(players[i]).transfer(ticketFee);
             players.pop();
         }
     }
 
-    function receiveNFT() external {} //vrfCalled mod
+    //receiving nft function w/ vrfCalled mod
 
     //master function for 2.5% commission withdrawal
 
