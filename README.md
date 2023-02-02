@@ -6,7 +6,9 @@ This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's engine
 
 # Key Features:
 
-1. Owners can intiate NFT raffles with customizable number of entry limits, entry prices, and start/end dates.
-2. User can enter/exit until all slots are filled.
-3. SupraOracle VRF will select winner (time-bound)
-4. Prior to winner selection, owners can delete a raffle
+1. NFT owners can intiate raffles with custom entry limits, entry prices, and start/end dates.
+2. Users can enter/exit until end date.
+3. Prior to winner selection, NFT owners can delete a raffle.
+4. Time-bound oracle VRF will select winner.
+5. Automatic NFT and fee pool disbursement
+6. Contract receives 2.5% commission - contract owner can transfer ownership and withdraw funds.
