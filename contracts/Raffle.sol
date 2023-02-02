@@ -17,7 +17,7 @@ error Raffle__VRFNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyNFTOwnerCanAccess();
 
-contract Raffle is IERC721Receiver, Ownable {
+contract Raffle {
     // Raffle Content
     address payable immutable nftOwner;
     uint256 public immutable ticketFee;
