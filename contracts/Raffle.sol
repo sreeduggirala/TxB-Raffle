@@ -5,6 +5,7 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 
 // Custom Errors
 error Raffle__SendMoreToEnterRaffle();
@@ -13,6 +14,7 @@ error Raffle__RaffleFull();
 error Raffle__RaffleOngoing();
 error Raffle__ContractNotHoldingNFT();
 error Raffle__InsufficientTicketsLeft();
+error Raffle__InsufficientTicketsBought();
 error Raffle__VRFNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyNFTOwnerCanAccess();
@@ -47,27 +49,6 @@ contract Raffle {
         endTime = _endTime;
     }
 
-    modifier onlynftOwner() {
-        if(msg.sender != nftOwner) {
-            revert Raffle__OnlyNFTOwnerCanAccess();
-        }
-        _;
-    }
-
-    modifier nftHeld() {
-        if(holdingNFT != true) {
-            revert Raffle__ContractNotHoldingNFT();
-        }
-        _;
-    }
-
-    modifier vrfCalled() {
-        if(vrfNumberRequested == true) {
-            revert Raffle__WinnerAlreadySelected();
-            _;
-        }
-    }
-
     function enterRaffle(uint256 _numTickets) payable external nftHeld { //contract has to receive/own NFT; vrfCalled mod
         if(_numTickets <= 0) {
             revert Raffle__CannotBuy0Slots();
@@ -93,9 +74,43 @@ contract Raffle {
 
         emit RaffleEntered(msg.sender, _numTickets);
     }
-    
-    function exitRaffle() external nftHeld { //vrfCalled mod
 
+    modifier onlynftOwner() {
+        if(msg.sender != nftOwner) {
+            revert Raffle__OnlyNFTOwnerCanAccess();
+        }
+        _;
+    }
+
+    modifier nftHeld() {
+        if(holdingNFT != true) {
+            revert Raffle__ContractNotHoldingNFT();
+        }
+        _;
+    }
+
+    modifier vrfCalled() {
+        if(vrfNumberRequested == true) {
+            revert Raffle__WinnerAlreadySelected();
+            _;
+        }
+    }
+    
+    function exitRaffle(uint256 _numTickets) external nftHeld { //vrfCalled mod
+        if(playerTickets[msg.sender] < _numTickets) {
+            revert Raffle__InsufficientTicketsBought();
+        }
+
+        uint256 i;
+        while(i < players.length && _numTickets > 0) {
+            if(players[i] != msg.sender) {
+                i++;
+            }
+
+            else {
+                //remove players[i] and refund player for ticket
+            }
+        }
     }
 
     function runRaffle() public {} //VRF selects winner when time ends
