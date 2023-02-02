@@ -3,7 +3,6 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@chainlink/contracts/src/v0.8/dev/VRFconsumerbase.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -18,7 +17,7 @@ error Raffle__VRFNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyNFTOwnerCanAccess();
 
-contract Raffle {
+contract Raffle is IERC721Receiver, Ownable {
     // Raffle Content
     address payable immutable nftOwner;
     uint256 public immutable ticketFee;
