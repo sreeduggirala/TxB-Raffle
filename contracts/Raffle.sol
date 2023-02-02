@@ -18,7 +18,7 @@ error Raffle__VRFNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyNFTOwnerCanAccess();
 
-contract Raffle is VRFConsumerbase, IERC721Receiver, Ownable {
+contract Raffle {
     // Raffle Content
     address payable immutable nftOwner;
     uint256 public immutable ticketFee;
@@ -126,7 +126,7 @@ contract Raffle is VRFConsumerbase, IERC721Receiver, Ownable {
 
     function receiveNFT() external {} //vrfCalled mod
 
-    //master function for 2.5% commssion withdrawal
+    //master function for 2.5% commission withdrawal
 
     //reappoint master function
 }
