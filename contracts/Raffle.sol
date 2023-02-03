@@ -2,10 +2,11 @@
 
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 
 // Custom Errors
+error NotOwner();
+error InvalidAddress();
 error Raffle__SendMoreToEnterRaffle();
 error Raffle__CannotBuy0Slots();
 error Raffle__RaffleFull();
@@ -17,7 +18,10 @@ error Raffle__RandomNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyNFTOwnerCanAccess();
 
-contract Raffle is Ownable {
+contract Raffle {
+    //Owner
+    address payable owner; 
+
     // Raffle Content
     address payable immutable nftOwner;
     uint256 public immutable ticketFee;
@@ -68,6 +72,13 @@ contract Raffle is Ownable {
             revert Raffle__WinnerAlreadySelected();
             _;
         }
+    }
+
+    modifier onlyOwner() {
+        if(msg.sender == owner) {
+            revert NotOwner();
+        }
+        _;
     }
 
     function enterRaffle(uint256 _numTickets) payable external nftHeld { //contract has to receive/own NFT; vrfCalled mod
@@ -126,7 +137,7 @@ contract Raffle is Ownable {
             revert Raffle__RandomNumberStillLoading();
         }
 
-        payable(nftOwner).transfer((address(this).balance * 975)/100);
+        payable(nftOwner).transfer((address(this).balance * 975)/1000);
         address winner = players[randomNumber % players.length];
         //transfer NFT to winner
         holdingNFT = false;
@@ -146,7 +157,15 @@ contract Raffle is Ownable {
 
     //receiving nft function w/ vrfCalled mod
 
-    //master function for 2.5% commission withdrawal
+    function withdrawCommission() external onlyOwner {
+        payable(owner).transfer((address(this).balance * 25)/1000);
+    }
 
-    //reappoint master function
+    function reappointOwner(address payable _newOwner) external onlyOwner {
+        if(_newOwner == address(0)) {
+            revert InvalidAddress();
+        }
+
+        owner = _newOwner;
+    }
 }
