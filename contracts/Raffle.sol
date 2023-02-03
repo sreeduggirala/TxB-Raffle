@@ -15,11 +15,11 @@ error Raffle__RaffleOngoing();
 error Raffle__ContractNotHoldingNFT();
 error Raffle__InsufficientTicketsLeft();
 error Raffle__InsufficientTicketsBought();
-error Raffle__VRFNumberStillLoading();
+error Raffle__RandomNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyNFTOwnerCanAccess();
 
-contract Raffle {
+contract Raffle is Ownable {
     // Raffle Content
     address payable immutable nftOwner;
     uint256 public immutable ticketFee;
@@ -29,8 +29,10 @@ contract Raffle {
     bool holdingNFT;
 
     //Chainlink Content
-    uint256 vrfNumber;
-    bool public vrfNumberRequested;
+    bytes32 internal keyHash;
+    uint256 internal fee;
+    uint256 public randomNumber;
+    bool public randomNumberRequested;
 
     // Player Content
     address payable[] public players;
@@ -47,6 +49,27 @@ contract Raffle {
         maxTickets = _maxTickets;
         startTime = _startTime;
         endTime = _endTime;
+    }
+
+    modifier onlynftOwner() {
+        if(msg.sender != nftOwner) {
+            revert Raffle__OnlyNFTOwnerCanAccess();
+        }
+        _;
+    }
+
+    modifier nftHeld() {
+        if(holdingNFT != true) {
+            revert Raffle__ContractNotHoldingNFT();
+        }
+        _;
+    }
+
+    modifier vrfCalled() {
+        if(randomNumberRequested == true) {
+            revert Raffle__WinnerAlreadySelected();
+            _;
+        }
     }
 
     function enterRaffle(uint256 _numTickets) payable external nftHeld { //contract has to receive/own NFT; vrfCalled mod
@@ -74,27 +97,6 @@ contract Raffle {
 
         emit RaffleEntered(msg.sender, _numTickets);
     }
-
-    modifier onlynftOwner() {
-        if(msg.sender != nftOwner) {
-            revert Raffle__OnlyNFTOwnerCanAccess();
-        }
-        _;
-    }
-
-    modifier nftHeld() {
-        if(holdingNFT != true) {
-            revert Raffle__ContractNotHoldingNFT();
-        }
-        _;
-    }
-
-    modifier vrfCalled() {
-        if(vrfNumberRequested == true) {
-            revert Raffle__WinnerAlreadySelected();
-            _;
-        }
-    }
     
     function exitRaffle(uint256 _numTickets) external nftHeld { //vrfCalled mod
         if(playerTickets[msg.sender] < _numTickets) {
@@ -118,12 +120,12 @@ contract Raffle {
     function runRaffle() public {} //VRF selects winner when time ends
 
     function disbursement() external nftHeld {
-        if(vrfNumber == 0) {
-            revert Raffle__VRFNumberStillLoading();
+        if(randomNumber == 0) {
+            revert Raffle__RandomNumberStillLoading();
         }
 
-        payable(nftOwner).transfer((address(this).balance * 98)/100);
-        address winner = players[vrfNumber % players.length];
+        payable(nftOwner).transfer((address(this).balance * 975)/100);
+        address winner = players[randomNumber % players.length];
         //transfer NFT to winner
         holdingNFT = false;
         emit RaffleWinner(winner);
