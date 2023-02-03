@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 
@@ -115,9 +113,13 @@ contract Raffle is Ownable {
                 payable(msg.sender).transfer(ticketFee);
             }
         }
+
+        emit RaffleRefunded(msg.sender, _numTickets);
     }
 
-    function runRaffle() public {} //VRF selects winner when time ends
+    function receiveRandomWinner() external {}
+
+    function fulfillRandomness() external {}
 
     function disbursement() external nftHeld {
         if(randomNumber == 0) {
