@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 
 // Custom Errors
@@ -20,7 +20,7 @@ error Raffle__RandomNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyNFTOwnerCanAccess();
 
-abstract contract Raffle is ERC721, VRFV2WrapperConsumerBase {
+abstract contract Raffle is IERC721Receiver, VRFV2WrapperConsumerBase {
     //Contract Owner
     address payable public owner; 
 
