@@ -24,9 +24,12 @@ error OnlyNFTOwnerCanAccess();
 error NoRaffleForThisNFT();
 error NoRaffleForThisID();
 
-abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
+// You do not need to inherit from IERC721. Also, 
+// contract should not be abstract, but that can be fixed once you implement 
+// the Chainlink logic.
+abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
     //Contract Owner
-    address payable public owner; 
+    // address payable public owner; 
 
     //Raffle Content
     address payable immutable nftOwner;
@@ -36,7 +39,6 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
     uint256 public endTime;
     address public immutable nftContract;
     uint256 public immutable nftID;
-    bool holdingNFT;
 
     //Chainlink Content
     bytes32 internal keyHash;
@@ -54,7 +56,7 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
     event RaffleWinner(address indexed winner);
 
     constructor(uint256 _ticketFee, uint256 _maxTickets, uint256 _startTime, uint256 _endTime, address _nftContract, uint256 _nftID) {
-        owner = payable(address(0x8B603f2890694cF31689dFDA28Ff5e79917243e9));
+        // owner = payable(address(0x8B603f2890694cF31689dFDA28Ff5e79917243e9)); taken care of by Ownable
         nftOwner = payable(msg.sender);
         ticketFee = _ticketFee;
         maxTickets = _maxTickets;
@@ -64,6 +66,7 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
         nftID = _nftID;
     }
 
+    // Only the owner of the raffle can access this function.
     modifier onlynftOwner() {
         if(msg.sender != nftOwner) {
             revert OnlyNFTOwnerCanAccess();
@@ -71,13 +74,13 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
         _;
     }
 
+    // Function only works if contract is holding the NFT.
     modifier nftHeld() {
-        if(holdingNFT != true) {
-            revert ContractNotHoldingNFT();
-        }
+        require(IERC721(nftContract).ownerOf(nftID) == address(this), "Contract is not holding the raffle NFT");
         _;
     }
 
+    // Function only works if random number was not chosen yet.
     modifier vrfCalled() {
         if(randomNumberRequested == true) {
             revert WinnerAlreadyChosen();
@@ -85,13 +88,7 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
         }
     }
 
-    modifier onlyOwner() {
-        if(msg.sender == owner) {
-            revert NotOwner();
-        }
-        _;
-    }
-
+    // Enter the NFT raffle
     function enterRaffle(uint256 _numTickets) payable external nftHeld { //vrfCalled mod
         if(_numTickets <= 0) {
             revert InvalidSlotAmount();
@@ -101,10 +98,13 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
             revert InsufficientAmount();
         }
 
+        // Consider not setting a cap on the amount of tickets to be sold. If there is a particularly hot raffle, 
+        // a LOT of people are going to be reverted at this conditional.
         if(maxTickets - players.length < _numTickets) {
             revert InsufficientTicketsLeft();
         }
 
+        // You can delete this. It functions the same as the conditional above. Also, if I bought the last ticket, this would still revert.
         if(players.length == maxTickets) {
             revert RaffleFull();
         }
@@ -118,13 +118,15 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
         emit RaffleEntered(msg.sender, _numTickets);
     }
     
+    // We went over this. here is a potential fix:
     function exitRaffle(uint256 _numTickets) external nftHeld { //vrfCalled mod
         if(playerTickets[msg.sender] < _numTickets) {
             revert InsufficientTicketsBought();
         }
 
-        uint256 i;
-        while(i < players.length && _numTickets > 0) {
+        uint256 nt = _numTickets;
+        uint256 i = 0;
+        while(i < players.length && nt > 0) {
             if(players[i] != msg.sender) {
                 i++;
             }
@@ -133,6 +135,7 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
                 players[i] = players[players.length - 1];
                 players.pop();
                 payable(msg.sender).transfer(ticketFee);
+                nt--;
             }
         }
 
@@ -144,6 +147,8 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
     function fulfillRandomness() external {} //Chainlink
 
     function disbursement() external nftHeld { ///automatically occurrs when time runs out
+        // Theoretically, the randomNumber can be 0, and if it is, the person who bought the first ticket will be pretty mad.
+      // maybe initialize randomNumber to uint256(-1).
         if(randomNumber == 0) {
             revert RandomNumberStillLoading();
         }
@@ -151,28 +156,11 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
         payable(nftOwner).transfer((address(this).balance * 975)/1000);
         address payable winner = payable(players[randomNumber % players.length]);
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
-        holdingNFT = false;
         emit RaffleWinner(winner);
-    }
-
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external override returns (bytes4) {
-        if(from != nftContract) {
-            revert NoRaffleForThisNFT();
-        }
-        
-        if(tokenId != nftID) {
-            revert NoRaffleForThisID();
-        }
-        
-        holdingNFT = true;
-
-        return 0x105b7a02;
     }
 
     function deleteRaffle() external onlynftOwner nftHeld { //vrfCalled mod
         IERC721(nftContract).safeTransferFrom(address(this), msg.sender, nftID);
-
-        holdingNFT = false;
 
         for(uint256 i = players.length - 1; i >= 0; i--) {
             payable(players[i]).transfer(ticketFee);
@@ -181,17 +169,18 @@ abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
     }
 
     function ownerCommission() external onlyOwner { 
-        if(holdingNFT == true) {
+        if(IERC721(nftContract).ownerOf(nftID) == address(this)) {
             revert ContractNotHoldingNFT();
         }
-        payable(owner).transfer((address(this).balance));
+        payable(owner()).transfer((address(this).balance));
     }
 
-    function reappointOwner(address payable _newOwner) external onlyOwner {
-        if(_newOwner == address(0)) {
-            revert InvalidAddress();
-        }
+    // This is already implemented with TransferOwnership in Ownable
+    // function reappointOwner(address payable _newOwner) external onlyOwner {
+    //    if(_newOwner == address(0)) {
+    //        revert InvalidAddress();
+    //    }
 
-        owner = _newOwner;
-    }
+    //   owner = _newOwner;
+    //}
 }
