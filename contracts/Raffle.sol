@@ -4,7 +4,8 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-//import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 
 // Custom Errors
 error NotOwner();
@@ -23,7 +24,7 @@ error OnlyNFTOwnerCanAccess();
 error NoRaffleForThisNFT();
 error NoRaffleForThisID();
 
-abstract contract Raffle is IERC721, IERC721Receiver {
+abstract contract Raffle is IERC721, IERC721Receiver, VRFV2WrapperConsumerBase {
     //Contract Owner
     address payable public owner; 
 
