@@ -3,24 +3,27 @@
 pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+//import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 
 // Custom Errors
 error NotOwner();
 error InvalidAddress();
-error Raffle__SendMoreToEnterRaffle();
-error Raffle__CannotBuy0Slots();
-error Raffle__RaffleFull();
-error Raffle__RaffleOngoing();
-error Raffle__ContractNotHoldingNFT();
-error Raffle__ContractHoldingNFT();
-error Raffle__InsufficientTicketsLeft();
-error Raffle__InsufficientTicketsBought();
-error Raffle__RandomNumberStillLoading();
-error Raffle__WinnerAlreadySelected();
-error Raffle__OnlyNFTOwnerCanAccess();
+error InsufficientAmount();
+error InvalidSlotAmount();
+error RaffleFull();
+error RaffleOngoing();
+error ContractNotHoldingNFT();
+error ContractHoldingNFT();
+error InsufficientTicketsLeft();
+error InsufficientTicketsBought();
+error RandomNumberStillLoading();
+error WinnerAlreadyChosen();
+error OnlyNFTOwnerCanAccess(); 
+error NoRaffleForThisNFT();
+error NoRaffleForThisID();
 
-abstract contract Raffle is IERC721Receiver, VRFV2WrapperConsumerBase {
+abstract contract Raffle is IERC721, IERC721Receiver {
     //Contract Owner
     address payable public owner; 
 
@@ -62,21 +65,21 @@ abstract contract Raffle is IERC721Receiver, VRFV2WrapperConsumerBase {
 
     modifier onlynftOwner() {
         if(msg.sender != nftOwner) {
-            revert Raffle__OnlyNFTOwnerCanAccess();
+            revert OnlyNFTOwnerCanAccess();
         }
         _;
     }
 
     modifier nftHeld() {
         if(holdingNFT != true) {
-            revert Raffle__ContractNotHoldingNFT();
+            revert ContractNotHoldingNFT();
         }
         _;
     }
 
     modifier vrfCalled() {
         if(randomNumberRequested == true) {
-            revert Raffle__WinnerAlreadySelected();
+            revert WinnerAlreadyChosen();
             _;
         }
     }
@@ -88,21 +91,21 @@ abstract contract Raffle is IERC721Receiver, VRFV2WrapperConsumerBase {
         _;
     }
 
-    function enterRaffle(uint256 _numTickets) payable external nftHeld { //contract has to receive/own NFT; vrfCalled mod
+    function enterRaffle(uint256 _numTickets) payable external nftHeld { //vrfCalled mod
         if(_numTickets <= 0) {
-            revert Raffle__CannotBuy0Slots();
+            revert InvalidSlotAmount();
         }
         
         if(msg.value < ticketFee * _numTickets) {
-            revert Raffle__SendMoreToEnterRaffle();
+            revert InsufficientAmount();
         }
 
         if(maxTickets - players.length < _numTickets) {
-            revert Raffle__InsufficientTicketsLeft();
+            revert InsufficientTicketsLeft();
         }
 
         if(players.length == maxTickets) {
-            revert Raffle__RaffleFull();
+            revert RaffleFull();
         }
 
         for(uint256 i = 0; i < _numTickets; i++) {
@@ -116,7 +119,7 @@ abstract contract Raffle is IERC721Receiver, VRFV2WrapperConsumerBase {
     
     function exitRaffle(uint256 _numTickets) external nftHeld { //vrfCalled mod
         if(playerTickets[msg.sender] < _numTickets) {
-            revert Raffle__InsufficientTicketsBought();
+            revert InsufficientTicketsBought();
         }
 
         uint256 i;
@@ -135,24 +138,38 @@ abstract contract Raffle is IERC721Receiver, VRFV2WrapperConsumerBase {
         emit RaffleRefunded(msg.sender, _numTickets);
     }
 
-    function receiveRandomWinner() external {}
+    function receiveRandomWinner() external {} //Chainlink
 
-    function fulfillRandomness() external {}
+    function fulfillRandomness() external {} //Chainlink
 
-    function disbursement() external nftHeld {
+    function disbursement() external nftHeld { ///automatically occurrs when time runs out
         if(randomNumber == 0) {
-            revert Raffle__RandomNumberStillLoading();
+            revert RandomNumberStillLoading();
         }
 
         payable(nftOwner).transfer((address(this).balance * 975)/1000);
-        address winner = players[randomNumber % players.length];
-        //transfer NFT to winner
+        address payable winner = payable(players[randomNumber % players.length]);
+        IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
         holdingNFT = false;
         emit RaffleWinner(winner);
     }
 
+    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data) external override returns (bytes4) {
+        if(from != nftContract) {
+            revert NoRaffleForThisNFT();
+        }
+        
+        if(tokenId != nftID) {
+            revert NoRaffleForThisID();
+        }
+        
+        holdingNFT = true;
+
+        return 0x105b7a02;
+    }
+
     function deleteRaffle() external onlynftOwner nftHeld { //vrfCalled mod
-        //transfer NFT to original nftOwner
+        IERC721(nftContract).safeTransferFrom(address(this), msg.sender, nftID);
 
         holdingNFT = false;
 
@@ -162,11 +179,9 @@ abstract contract Raffle is IERC721Receiver, VRFV2WrapperConsumerBase {
         }
     }
 
-    //receiving nft function w/ vrfCalled mod
-
     function ownerCommission() external onlyOwner { 
         if(holdingNFT == true) {
-            revert Raffle__ContractNotHoldingNFT();
+            revert ContractNotHoldingNFT();
         }
         payable(owner).transfer((address(this).balance));
     }
@@ -178,7 +193,4 @@ abstract contract Raffle is IERC721Receiver, VRFV2WrapperConsumerBase {
 
         owner = _newOwner;
     }
-
-    
-    
 }
