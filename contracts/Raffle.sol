@@ -39,7 +39,7 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
     // Chainlink Content
     bytes32 internal keyHash;
     uint256 internal fee;
-    uint256 public randomNumber;
+    uint256 public randomNumber = type(uint256).max;
     bool public randomNumberRequested;
 
     // Player Content
@@ -131,9 +131,7 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
     function fulfillRandomness() external {} //Chainlink
 
     function disbursement() external nftHeld { ///automatically occurrs when time runs out
-        // Theoretically, the randomNumber can be 0, and if it is, the person who bought the first ticket will be pretty mad.
-      // maybe initialize randomNumber to uint256(-1).
-        if(randomNumber == 0) {
+        if(randomNumber == type(uint256).max) {
             revert RandomNumberStillLoading();
         }
 
