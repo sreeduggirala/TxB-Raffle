@@ -24,23 +24,19 @@ error OnlyNFTOwnerCanAccess();
 error NoRaffleForThisNFT();
 error NoRaffleForThisID();
 
-// You do not need to inherit from IERC721. Also, 
-// contract should not be abstract, but that can be fixed once you implement 
-// the Chainlink logic.
+// contract shouldn't be abstract; change once Chainlink is implemented
 abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
-    //Contract Owner
-    // address payable public owner; 
-
-    //Raffle Content
+    
+    // Raffle Content
     address payable immutable nftOwner;
     uint256 public immutable ticketFee;
-    uint256 public immutable maxTickets;
+    uint256 public immutable minTickets;
     uint256 public startTime;
     uint256 public endTime;
     address public immutable nftContract;
     uint256 public immutable nftID;
 
-    //Chainlink Content
+    // Chainlink Content
     bytes32 internal keyHash;
     uint256 internal fee;
     uint256 public randomNumber;
@@ -55,11 +51,10 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
     event RaffleRefunded(address indexed player, uint256 numRefunded);
     event RaffleWinner(address indexed winner);
 
-    constructor(uint256 _ticketFee, uint256 _maxTickets, uint256 _startTime, uint256 _endTime, address _nftContract, uint256 _nftID) {
-        // owner = payable(address(0x8B603f2890694cF31689dFDA28Ff5e79917243e9)); taken care of by Ownable
+    constructor(uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, uint256 _endTime, address _nftContract, uint256 _nftID) {
         nftOwner = payable(msg.sender);
         ticketFee = _ticketFee;
-        maxTickets = _maxTickets;
+        minTickets = _minTickets;
         startTime = _startTime;
         endTime = _endTime;
         nftContract = _nftContract;
@@ -98,17 +93,6 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
             revert InsufficientAmount();
         }
 
-        // Consider not setting a cap on the amount of tickets to be sold. If there is a particularly hot raffle, 
-        // a LOT of people are going to be reverted at this conditional.
-        if(maxTickets - players.length < _numTickets) {
-            revert InsufficientTicketsLeft();
-        }
-
-        // You can delete this. It functions the same as the conditional above. Also, if I bought the last ticket, this would still revert.
-        if(players.length == maxTickets) {
-            revert RaffleFull();
-        }
-
         for(uint256 i = 0; i < _numTickets; i++) {
             players.push(payable(msg.sender));
         }
@@ -118,7 +102,6 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
         emit RaffleEntered(msg.sender, _numTickets);
     }
     
-    // We went over this. here is a potential fix:
     function exitRaffle(uint256 _numTickets) external nftHeld { //vrfCalled mod
         if(playerTickets[msg.sender] < _numTickets) {
             revert InsufficientTicketsBought();
@@ -174,13 +157,4 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
         }
         payable(owner()).transfer((address(this).balance));
     }
-
-    // This is already implemented with TransferOwnership in Ownable
-    // function reappointOwner(address payable _newOwner) external onlyOwner {
-    //    if(_newOwner == address(0)) {
-    //        revert InvalidAddress();
-    //    }
-
-    //   owner = _newOwner;
-    //}
 }
