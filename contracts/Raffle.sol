@@ -4,7 +4,6 @@ pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
 
 // Custom Errors
@@ -25,7 +24,9 @@ error NoRaffleForThisNFT();
 error NoRaffleForThisID();
 
 // contract shouldn't be abstract once Chainlink is implemented
-abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
+abstract contract Raffle is VRFV2WrapperConsumerBase {
+    // Contract Owner
+    address payable public owner;
     
     // Raffle Content
     address payable immutable nftOwner;
@@ -53,6 +54,7 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
 
     constructor(uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, 
     uint256 _endTime, address _nftContract, uint256 _nftID) {
+        owner = payable(address(0x8B603f2890694cF31689dFDA28Ff5e79917243e9));
         nftOwner = payable(msg.sender);
         ticketFee = _ticketFee;
         minTickets = _minTickets;
@@ -82,6 +84,13 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
             revert WinnerAlreadyChosen();
             _;
         }
+    }
+
+    modifier onlyOwner() {
+        if(msg.sender != owner) {
+            revert NotOwner();
+        }
+        _;
     }
 
     // Enter the NFT raffle
@@ -155,6 +164,10 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
             revert ContractNotHoldingNFT();
         }
 
-        payable(owner()).transfer((address(this).balance));
+        payable(owner).transfer((address(this).balance));
+    }
+
+    function reappointOwner(address payable _newOwner) external onlyOwner {
+        owner = payable(_newOwner);
     }
 }
