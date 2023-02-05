@@ -5,7 +5,8 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/VRFV2WrapperConsumerBase.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 // Custom Errors
 error NotOwner();
@@ -25,16 +26,16 @@ error NoRaffleForThisNFT();
 error NoRaffleForThisID();
 
 // contract shouldn't be abstract once Chainlink is implemented
-abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
+abstract contract Raffle is Ownable, VRFConsumerBaseV2 {
     
     // Raffle Content
-    address payable immutable nftOwner;
-    uint256 public immutable ticketFee;
-    uint256 public immutable minTickets;
+    address payable public nftOwner;
+    uint256 public ticketFee;
+    uint256 public minTickets;
     uint256 public startTime;
     uint256 public endTime;
-    address public immutable nftContract;
-    uint256 public immutable nftID;
+    address public nftContract;
+    uint256 public nftID;
 
     // Chainlink Content
     bytes32 internal keyHash;
@@ -52,7 +53,8 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
     event RaffleWinner(address indexed winner);
 
     constructor(uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, 
-    uint256 _endTime, address _nftContract, uint256 _nftID) {
+    uint256 _endTime, address _nftContract, uint256 _nftID) Ownable() {
+        _transferOwnership(_msgSender());
         nftOwner = payable(msg.sender);
         ticketFee = _ticketFee;
         minTickets = _minTickets;
@@ -72,7 +74,9 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
 
     // Function only works if contract is holding the NFT.
     modifier nftHeld() {
-        require(IERC721(nftContract).ownerOf(nftID) == address(this), "Contract is not holding the raffle NFT");
+        if(IERC721(nftContract).ownerOf(nftID) != address(this)) {
+            revert ContractNotHoldingNFT();
+        }
         _;
     }
 
