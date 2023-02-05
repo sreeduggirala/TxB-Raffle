@@ -6,7 +6,7 @@ This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's engine
 
 # Key Features:
 
-1. NFT owners can intiate raffles with custom entry limits, ticket prices, and start/end dates.
+1. NFT owners can intiate raffles with custom slots, ticket prices, and start/end dates.
 2. Ticket are purchasable/refundable prior to end date.
 3. NFT owners can delete raffles prior to winner selection.
 4. Time-bound VRF-based winner selection.

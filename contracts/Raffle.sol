@@ -24,7 +24,7 @@ error OnlyNFTOwnerCanAccess();
 error NoRaffleForThisNFT();
 error NoRaffleForThisID();
 
-// contract shouldn't be abstract; change once Chainlink is implemented
+// contract shouldn't be abstract once Chainlink is implemented
 abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
     
     // Raffle Content
@@ -51,7 +51,8 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
     event RaffleRefunded(address indexed player, uint256 numRefunded);
     event RaffleWinner(address indexed winner);
 
-    constructor(uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, uint256 _endTime, address _nftContract, uint256 _nftID) {
+    constructor(uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, 
+    uint256 _endTime, address _nftContract, uint256 _nftID) {
         nftOwner = payable(msg.sender);
         ticketFee = _ticketFee;
         minTickets = _minTickets;
@@ -155,6 +156,7 @@ abstract contract Raffle is VRFV2WrapperConsumerBase, Ownable {
         if(IERC721(nftContract).ownerOf(nftID) == address(this)) {
             revert ContractNotHoldingNFT();
         }
+
         payable(owner()).transfer((address(this).balance));
     }
 }
