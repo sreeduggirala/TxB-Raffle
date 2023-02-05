@@ -53,9 +53,9 @@ abstract contract Raffle is Ownable, VRFConsumerBaseV2 {
     event RaffleWinner(address indexed winner);
 
     constructor(uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, 
-    uint256 _endTime, address _nftContract, uint256 _nftID) Ownable() {
+    uint256 _endTime, address _nftContract, uint256 _nftID, address payable _nftOwner) Ownable() {
         _transferOwnership(_msgSender());
-        nftOwner = payable(msg.sender);
+        nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
         minTickets = _minTickets;
         startTime = _startTime;
