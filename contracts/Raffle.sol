@@ -37,10 +37,11 @@ abstract contract Raffle is Ownable, VRFConsumerBaseV2 {
     address public nftContract;
     uint256 public nftID;
 
-    // Chainlink Content
+    // Chainlink Content -- VALUES SET TO GOERLI
     bytes32 internal keyHash;
     uint256 internal fee;
-    uint256 public randomNumber = type(uint256).max;
+    address internal vrfCoordinator = 0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D;
+    uint256 internal randomNumber = type(uint256).max;
     bool public randomNumberRequested;
 
     // Player Content
@@ -52,9 +53,8 @@ abstract contract Raffle is Ownable, VRFConsumerBaseV2 {
     event RaffleRefunded(address indexed player, uint256 numRefunded);
     event RaffleWinner(address indexed winner);
 
-    constructor(uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, 
-    uint256 _endTime, address _nftContract, uint256 _nftID, address payable _nftOwner) Ownable() {
-        _transferOwnership(_msgSender());
+    constructor(address payable _nftOwner, uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, 
+    uint256 _endTime, address _nftContract, uint256 _nftID) Ownable() VRFConsumerBaseV2(vrfCoordinator) {
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
         minTickets = _minTickets;
