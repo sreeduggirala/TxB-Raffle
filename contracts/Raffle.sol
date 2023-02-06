@@ -37,8 +37,8 @@ contract Raffle is Ownable, VRFConsumerBase {
     uint256 public nftID;
 
     // Chainlink Content --> INITIALIZED TO GOERLI - NOT STANDARDIZED
-    bytes32 internal keyHash;
-    uint256 internal fee; 
+    bytes32 internal keyHash = 0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15;
+    uint256 internal fee = 0.1 * 10**18; //0.1 LINK
     address internal vrfCoordinator = 0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D;
     address internal linkToken = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
     uint256 internal randomNumber = type(uint256).max;
@@ -54,7 +54,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     event RaffleWinner(address indexed winner);
 
     constructor(address payable _nftOwner, uint256 _ticketFee, uint256 _minTickets, uint256 _startTime, 
-    uint256 _endTime, address _nftContract, uint256 _nftID) Ownable() VRFConsumerBase(vrfCoordinator, linkToken) {
+    uint256 _endTime, address _nftContract, uint256 _nftID, bytes32 _keyHash, uint256 _fee) Ownable() VRFConsumerBase(vrfCoordinator, linkToken) {
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
         minTickets = _minTickets;
@@ -62,8 +62,8 @@ contract Raffle is Ownable, VRFConsumerBase {
         endTime = _endTime;
         nftContract = _nftContract;
         nftID = _nftID;
-        keyHash = 0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15;
-        fee = 0.1 * 10**18; //0.1 LINK
+        keyHash = _keyHash;
+        fee = _fee;
     }
 
     // Only the owner of the raffle can access this function.
