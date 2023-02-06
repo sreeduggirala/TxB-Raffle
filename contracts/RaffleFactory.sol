@@ -5,6 +5,9 @@ pragma solidity ^0.8.0;
 import "./Raffle.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+// Custom Errors
+error InvalidAmount();
+
 contract RaffleFactory is Ownable {
     uint256 public fee;
     bytes32 public keyHash;
@@ -21,10 +24,14 @@ contract RaffleFactory is Ownable {
     }
 
     function createRaffle(address _nftContract, uint256 _nftID, uint256 _ticketPrice, uint256 _minTickets) external {
+        if(_ticketPrice <= 0 || _minTickets == 0) {
+            revert InvalidAmount();
+        }
 
-        //creates new Raffle contract
-
-        //emits RaffleCreated event
+        Raffle raffle = new Raffle(payable(msg.sender), _ticketPrice, _minTickets, _nftContract, _nftID, keyHash, fee);
+        emit RaffleCreated(address(raffle), msg.sender, _nftContract, _nftID, _ticketPrice, _minTickets);
+        // Check if WalletFactory is approved to spend msg.sender LINK
+        // Require LINK balance of creator >= Chainlink VRF fee
     }
 
     function ownerWithdraw() public onlyOwner {
