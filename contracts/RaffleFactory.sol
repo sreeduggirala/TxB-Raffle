@@ -10,19 +10,22 @@ error InvalidAmount();
 error InsufficientLINKBalance();
 error InsufficientLINKAllowance();
 
+// INITIALIZED TO GOERLI - NOT STANDARDIZED
 contract RaffleFactory is Ownable {
-    uint256 public fee;
+    IERC20 public linkToken;
+    uint256 public fee = 0.1 * 10**18; //0.1 LINK
     bytes32 public keyHash;
     address public linkTokenAddress;
     address public vrfCoordinator;
 
     event RaffleCreated (address indexed raffle, address indexed nftOwner, address indexed nftContract, uint256 nftID, uint256 ticketPrice, uint256 minTickets);
 
-    constructor(uint256 _fee, bytes32 _keyHash, address _linkTokenAddress, address _vrfCoordinator) Ownable() {
-        fee = _fee;
-        keyHash = _keyHash;
-        linkTokenAddress = _linkTokenAddress;
-        vrfCoordinator = _vrfCoordinator;
+    constructor() Ownable() {
+        fee = 0.1 * 10**18; //0.1 LINK
+        keyHash = 0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15;
+        linkTokenAddress = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+        linkToken = IERC20(linkTokenAddress);
+        vrfCoordinator = 0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D;
     }
 
     function createRaffle(address _nftContract, uint256 _nftID, uint256 _ticketPrice, uint256 _minTickets) external {
@@ -32,8 +35,14 @@ contract RaffleFactory is Ownable {
 
         Raffle raffle = new Raffle(payable(msg.sender), _ticketPrice, _minTickets, _nftContract, _nftID, keyHash, fee);
         emit RaffleCreated(address(raffle), msg.sender, _nftContract, _nftID, _ticketPrice, _minTickets);
-        // Check if Factory is approved to spend msg.sender LINK
-        // Require LINK balance of creator >= Chainlink VRF fee
+        
+        if(linkToken.allowance(msg.sender, address(this)) < fee) {
+            revert InsufficientLINKAllowance();
+        }
+        
+        if(linkToken.balanceOf(msg.sender) < fee) {
+            revert InsufficientLINKBalance();
+        }
     }
 
     function ownerWithdraw() public onlyOwner {

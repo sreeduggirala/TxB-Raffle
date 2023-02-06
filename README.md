@@ -4,7 +4,7 @@ TxB Lottery is an NFT raffling application with ticket purchase/refund and prize
 
 This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's engineering cohort at UT Austin).
 
-# Key Features:
+# Key Features
 
 1. NFT owners can intiate raffles with custom slots, ticket prices, and start/end dates.
 2. Ticket are purchasable/refundable prior to end date.
@@ -13,3 +13,10 @@ This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's engine
 5. Automatic NFT and ticket pool disbursement
 6. Contract owner receives 2.5% commission
 7. Contract ownership transferability.
+
+# Extensions/Modifications
+1. ERC-20 and ERC-1155 raffles
+2. Mobile push notifications 
+
+Note: TxB Lottery is initialized to ETH Goerli Testnet; Chainlink content should be replaced with network-specific values.
+

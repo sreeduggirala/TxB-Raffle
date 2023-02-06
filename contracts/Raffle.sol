@@ -28,11 +28,11 @@ contract Raffle is Ownable, VRFConsumerBase {
     address public nftContract;
     uint256 public nftID;
 
-    // Chainlink Content --> INITIALIZED TO GOERLI - NOT STANDARDIZED
-    bytes32 internal keyHash = 0x79d3d8832d904592c0bf9818b621522c988bb8b0c05cdc3b15aea1b6e8db0c15;
-    uint256 internal fee = 0.1 * 10**18; //0.1 LINK
-    address internal vrfCoordinator = 0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D;
-    address internal linkToken = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB;
+    // Chainlink Content
+    bytes32 internal keyHash;
+    uint256 internal fee;
+    address internal vrfCoordinator;
+    address internal linkToken;
     uint256 internal randomNumber = type(uint256).max;
     bool public randomNumberRequested;
 
@@ -88,7 +88,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     }
 
     // Enter the NFT raffle
-    function enterRaffle(uint256 _numTickets) payable external nftHeld vrfCalled {
+    function enterRaffle(uint256 _numTickets) payable external nftHeld {
         if(_numTickets <= 0) {
             revert InvalidTicketAmount();
         }
@@ -106,7 +106,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         emit RaffleEntered(msg.sender, _numTickets);
     }
     
-    function exitRaffle(uint256 _numTickets) external nftHeld vrfCalled {
+    function exitRaffle(uint256 _numTickets) external nftHeld {
         if(playerTickets[msg.sender] < _numTickets) {
             revert InsufficientTicketsBought();
         }
@@ -155,7 +155,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         emit RaffleWinner(winner);
     }
 
-    function deleteRaffle() external onlynftOwner nftHeld vrfCalled {
+    function deleteRaffle() external onlynftOwner nftHeld {
         IERC721(nftContract).safeTransferFrom(address(this), msg.sender, nftID);
 
         for(uint256 i = players.length - 1; i >= 0; i--) {
