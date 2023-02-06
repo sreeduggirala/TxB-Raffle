@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // Custom Errors
 error InvalidAmount();
+error InsufficientLINKBalance();
+error InsufficientLINKAllowance();
 
 contract RaffleFactory is Ownable {
     uint256 public fee;
@@ -30,7 +32,7 @@ contract RaffleFactory is Ownable {
 
         Raffle raffle = new Raffle(payable(msg.sender), _ticketPrice, _minTickets, _nftContract, _nftID, keyHash, fee);
         emit RaffleCreated(address(raffle), msg.sender, _nftContract, _nftID, _ticketPrice, _minTickets);
-        // Check if WalletFactory is approved to spend msg.sender LINK
+        // Check if Factory is approved to spend msg.sender LINK
         // Require LINK balance of creator >= Chainlink VRF fee
     }
 

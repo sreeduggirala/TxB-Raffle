@@ -9,21 +9,15 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
 // Custom Errors
-error NotOwner();
-error InvalidAddress();
 error InsufficientAmount();
 error InvalidTicketAmount();
-error RaffleFull();
 error RaffleOngoing();
 error ContractNotHoldingNFT();
-error ContractHoldingNFT();
 error InsufficientTicketsLeft();
 error InsufficientTicketsBought();
 error RandomNumberStillLoading();
 error WinnerAlreadyChosen();
 error OnlyNFTOwnerCanAccess(); 
-error NoRaffleForThisNFT();
-error NoRaffleForThisID();
 
 contract Raffle is Ownable, VRFConsumerBase {
     
