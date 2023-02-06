@@ -25,7 +25,6 @@ error OnlyNFTOwnerCanAccess();
 error NoRaffleForThisNFT();
 error NoRaffleForThisID();
 
-// contract shouldn't be abstract once Chainlink is implemented
 contract Raffle is Ownable, VRFConsumerBase {
     
     // Raffle Content
