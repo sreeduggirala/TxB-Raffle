@@ -25,7 +25,6 @@ error OnlyNFTOwnerCanAccess();
 error NoRaffleForThisNFT();
 error NoRaffleForThisID();
 
-// contract shouldn't be abstract once Chainlink is implemented
 contract Raffle is Ownable, VRFConsumerBase {
     
     // Raffle Content
@@ -141,11 +140,9 @@ contract Raffle is Ownable, VRFConsumerBase {
 
     function fulfillRandomness(bytes32 requestId, uint256 random) internal override {
         randomNumber = random;
-    } //Chainlink
+    }
 
     function disbursement() external nftHeld { ///automatically occurrs when time runs out
-        // Theoretically, the randomNumber can be 0, and if it is, the person who bought the first ticket will be pretty mad.
-      // maybe initialize randomNumber to uint256(-1).
         if(randomNumber == 0) {
             revert RandomNumberStillLoading();
         }
