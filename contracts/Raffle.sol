@@ -138,12 +138,12 @@ contract Raffle is Ownable, VRFConsumerBase {
         return requestRandomness(keyHash, fee);
     }
 
-    function fulfillRandomness(bytes32 requestId, uint256 random) internal override {
-        randomNumber = random;
+    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
+        randomNumber = randomness;
     }
 
     function disbursement() external nftHeld { ///automatically occurrs when time runs out
-        if(randomNumber == 0) {
+        if(randomNumber == type(uint).max) {
             revert RandomNumberStillLoading();
         }
 
