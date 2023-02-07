@@ -9,9 +9,9 @@ TxB Raffle is an NFT raffling application with ticket purchase/refund and prize 
 1. NFT owners can intiate raffles with custom slots, ticket prices, and start/end dates.
 2. Ticket are purchasable/refundable prior to end date.
 3. NFT owners can delete raffles prior to winner selection.
-4. Time-bound VRF-based winner selection.
-5. Automatic NFT and ticket pool disbursement
-6. Contract owner receives 2.5% commission
+4. VRF-based winner selection.
+5. NFT and ticket fee pool disbursement.
+6. Contract owner receives 2.5% commission.
 7. Contract ownership transferability.
 
 # Extensions/Modifications
