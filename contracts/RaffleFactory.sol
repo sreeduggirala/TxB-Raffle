@@ -28,13 +28,13 @@ contract RaffleFactory is Ownable {
         vrfCoordinator = 0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D;
     }
 
-    function createRaffle(address _nftContract, uint256 _nftID, uint256 _ticketPrice, uint256 _minTickets) external {
-        if(_ticketPrice <= 0 || _minTickets == 0) {
+    function createRaffle(address _nftContract, uint256 _nftID, uint256 _endTime, uint256 _ticketFee, uint256 _minTickets) external {
+        if(_ticketFee <= 0 || _minTickets == 0) {
             revert InvalidAmount();
         }
 
-        Raffle raffle = new Raffle(payable(msg.sender), _ticketPrice, _minTickets, _nftContract, _nftID, keyHash, fee);
-        emit RaffleCreated(address(raffle), msg.sender, _nftContract, _nftID, _ticketPrice, _minTickets);
+        Raffle raffle = new Raffle(payable(msg.sender), _ticketFee, _endTime, _minTickets, _nftContract, _nftID, keyHash, fee);
+        emit RaffleCreated(address(raffle), msg.sender, _nftContract, _nftID, _ticketFee, _minTickets);
         
         if(linkToken.allowance(msg.sender, address(this)) < fee) {
             revert InsufficientLINKAllowance();

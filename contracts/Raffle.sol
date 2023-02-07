@@ -12,6 +12,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 error InsufficientAmount();
 error InvalidTicketAmount();
 error RaffleOngoing();
+error RaffleClosed();
 error ContractNotHoldingNFT();
 error InsufficientTicketsLeft();
 error InsufficientTicketsBought();
@@ -23,10 +24,11 @@ contract Raffle is Ownable, VRFConsumerBase {
     
     // Raffle Content
     address payable public nftOwner;
-    uint256 public ticketFee;
-    uint256 public minTickets;
-    address public nftContract;
-    uint256 public nftID;
+    uint256 public immutable ticketFee;
+    uint256 public endTime;
+    uint256 public immutable minTickets;
+    address public immutable nftContract;
+    uint256 public immutable nftID;
 
     // Chainlink Content
     bytes32 internal keyHash;
@@ -45,10 +47,11 @@ contract Raffle is Ownable, VRFConsumerBase {
     event RaffleRefunded(address indexed player, uint256 numRefunded);
     event RaffleWinner(address indexed winner);
 
-    constructor(address payable _nftOwner, uint256 _ticketFee, uint256 _minTickets,
+    constructor(address payable _nftOwner, uint256 _ticketFee, uint256 _endTime, uint256 _minTickets,
      address _nftContract, uint256 _nftID, bytes32 _keyHash, uint256 _fee) Ownable() VRFConsumerBase(vrfCoordinator, linkToken) {
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
+        endTime = _endTime;
         minTickets = _minTickets;
         nftContract = _nftContract;
         nftID = _nftID;
@@ -89,6 +92,10 @@ contract Raffle is Ownable, VRFConsumerBase {
 
     // Enter the NFT raffle
     function enterRaffle(uint256 _numTickets) payable external nftHeld {
+        if(block.timestamp >= endTime) {
+            revert RaffleClosed();
+        }
+
         if(_numTickets <= 0) {
             revert InvalidTicketAmount();
         }
@@ -106,7 +113,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         emit RaffleEntered(msg.sender, _numTickets);
     }
     
-    function exitRaffle(uint256 _numTickets) external nftHeld {
+    function exitRaffle(uint256 _numTickets) external nftHeld vrfCalled {
         if(playerTickets[msg.sender] < _numTickets) {
             revert InsufficientTicketsBought();
         }
@@ -129,7 +136,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         emit RaffleRefunded(msg.sender, _numTickets);
     }
 
-    function receiveRandomWinner() external enoughTickets returns(bytes32 requestId) { 
+    function receiveRandomWinner() external enoughTickets vrfCalled returns(bytes32 requestId) { 
         randomNumberRequested = true;
         
         return requestRandomness(keyHash, fee);
@@ -155,7 +162,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         emit RaffleWinner(winner);
     }
 
-    function deleteRaffle() external onlynftOwner nftHeld {
+    function deleteRaffle() external onlynftOwner nftHeld vrfCalled {
         IERC721(nftContract).safeTransferFrom(address(this), msg.sender, nftID);
 
         for(uint256 i = players.length - 1; i >= 0; i--) {
