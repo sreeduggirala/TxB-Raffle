@@ -13,7 +13,7 @@ error InsufficientLINKAllowance();
 // INITIALIZED TO GOERLI - NOT STANDARDIZED
 contract RaffleFactory is Ownable {
     IERC20 public linkToken;
-    uint256 public fee = 0.1 * 10 ** 18; //0.1 LINK
+    uint256 public fee;
     bytes32 public keyHash;
     address public linkTokenAddress;
     address public vrfCoordinator;
