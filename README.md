@@ -1,6 +1,6 @@
-# TxB Lottery
+# TxB Raffle
 
-TxB Lottery is an NFT raffling application with ticket purchase/refund and prize disbursement capabilities; random winner selection is ensured via verifiable random functions (VRFs). 
+TxB Raffle is an NFT raffling application with ticket purchase/refund and prize disbursement capabilities; random winner selection is ensured via verifiable random functions (VRFs). 
 
 This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's engineering cohort at UT Austin).
 
@@ -18,5 +18,5 @@ This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's engine
 1. ERC-20 and ERC-1155 raffles
 2. Mobile push notifications 
 
-Note: TxB Lottery is initialized to ETH Goerli Testnet; Chainlink content should be replaced with network-specific values.
+Note: TxB Raffle is initialized to ETH Goerli Testnet; Chainlink content should be replaced with network-specific values.
 
