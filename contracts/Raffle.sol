@@ -19,6 +19,7 @@ error InsufficientTicketsBought();
 error RandomNumberStillLoading();
 error WinnerAlreadyChosen();
 error OnlyNFTOwnerCanAccess();
+error NoBalance();
 
 contract Raffle is Ownable, VRFConsumerBase {
     // Raffle Content
@@ -166,6 +167,10 @@ contract Raffle is Ownable, VRFConsumerBase {
 
         if (randomNumberRequested != true) {
             revert RaffleOngoing();
+        }
+
+        if (address(this).balance == 0) {
+            revert NoBalance();
         }
 
         address payable winner = payable(
