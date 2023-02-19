@@ -75,7 +75,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         _;
     }
 
-    // Function only works if contract is holding the NFT.
+    // Function only executes if contract is holding the NFT.
     modifier nftHeld() {
         if (IERC721(nftContract).ownerOf(nftID) != address(this)) {
             revert ContractNotHoldingNFT();
@@ -83,7 +83,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         _;
     }
 
-    // Function only works if random number was not chosen yet.
+    // Function only executes if random number was not chosen yet.
     modifier vrfCalled() {
         if (randomNumberRequested == true) {
             revert WinnerAlreadyChosen();
@@ -91,6 +91,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         }
     }
 
+    // Function only executes if minimum ticket threshold is met
     modifier enoughTickets() {
         if (players.length < minTickets) {
             revert InsufficientTicketsBought();
