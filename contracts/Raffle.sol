@@ -29,6 +29,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     uint256 public immutable minTickets;
     address public immutable nftContract;
     uint256 public immutable nftID;
+    address payable winner;
 
     // Chainlink Content
     bytes32 internal keyHash;
@@ -46,6 +47,9 @@ contract Raffle is Ownable, VRFConsumerBase {
     event RaffleEntered(address indexed player, uint256 numPurchased);
     event RaffleRefunded(address indexed player, uint256 numRefunded);
     event RaffleWinner(address indexed winner);
+
+    // Raffle Requirements
+    uint256 minDuration = 86400; // 1 day in seconds
 
     constructor(
         address payable _nftOwner,
@@ -175,9 +179,7 @@ contract Raffle is Ownable, VRFConsumerBase {
             revert NoBalance();
         }
 
-        address payable winner = payable(
-            players[randomNumber % players.length]
-        );
+        winner = payable(players[randomNumber % players.length]);
         payable(nftOwner).transfer((address(this).balance * 975) / 1000);
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
         payable(owner()).transfer((address(this).balance)); // 2.5% commission of ticket fees
