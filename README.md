@@ -16,7 +16,6 @@ TxB Raffle is an NFT raffling application with ticket purchase/refund and prize 
 
 # Extensions/Modifications
 1. ERC-20 and ERC-1155 raffles
-2. Mobile push notifications 
 
 Note: TxB Raffle is initialized to ETH Goerli Testnet; Chainlink content should be replaced with network-specific values.
 
