@@ -137,6 +137,7 @@ contract Raffle is Ownable, VRFConsumerBase {
                 players.pop();
                 payable(msg.sender).transfer(ticketFee);
                 nt--;
+                playerTickets[msg.sender] = playerTickets[msg.sender] -= 1;
             }
         }
 
