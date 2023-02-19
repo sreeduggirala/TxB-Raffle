@@ -192,4 +192,10 @@ contract Raffle is Ownable, VRFConsumerBase {
             players.pop();
         }
     }
+
+    function extendTime(
+        uint256 _endTime
+    ) external onlynftOwner nftHeld vrfCalled {
+        endTime = _endTime;
+    }
 }
