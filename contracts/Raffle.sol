@@ -20,13 +20,13 @@ error RandomNumberStillLoading();
 error WinnerAlreadyChosen();
 error OnlyNFTOwnerCanAccess();
 error NoBalance();
+error TooShort();
 
 contract Raffle is Ownable, VRFConsumerBase {
     // Raffle Content
     address payable public nftOwner;
     uint256 public immutable ticketFee;
-    uint256 public startTime;
-    uint256 public endTime;
+    uint256 public immutable endTime;
     uint256 public immutable minTickets;
     address public immutable nftContract;
     uint256 public immutable nftID;
@@ -49,13 +49,9 @@ contract Raffle is Ownable, VRFConsumerBase {
     event RaffleRefunded(address indexed player, uint256 numRefunded);
     event RaffleWinner(address indexed winner);
 
-    // Raffle Requirements
-    uint256 minDuration = 86400; // 1 day in seconds
-
     constructor(
         address payable _nftOwner,
         uint256 _ticketFee,
-        uint256 _startTime,
         uint256 _endTime,
         uint256 _minTickets,
         address _nftContract,
@@ -65,7 +61,6 @@ contract Raffle is Ownable, VRFConsumerBase {
     ) Ownable() VRFConsumerBase(vrfCoordinator, linkToken) {
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
-        startTime = _startTime;
         endTime = _endTime;
         minTickets = _minTickets;
         nftContract = _nftContract;
@@ -108,7 +103,7 @@ contract Raffle is Ownable, VRFConsumerBase {
 
     // Enter the NFT raffle
     function enterRaffle(uint256 _numTickets) external payable nftHeld {
-        if (block.timestamp < startTime || block.timestamp > endTime) {
+        if (block.timestamp > endTime) {
             revert RaffleNotOpen();
         }
 
@@ -196,11 +191,5 @@ contract Raffle is Ownable, VRFConsumerBase {
             payable(players[i]).transfer(ticketFee);
             players.pop();
         }
-    }
-
-    function extendTime(
-        uint256 _endTime
-    ) external onlynftOwner nftHeld vrfCalled {
-        endTime = _endTime;
     }
 }

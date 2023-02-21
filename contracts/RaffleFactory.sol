@@ -38,7 +38,6 @@ contract RaffleFactory is Ownable {
     function createRaffle(
         address _nftContract,
         uint256 _nftID,
-        uint256 _startTime,
         uint256 _endTime,
         uint256 _ticketFee,
         uint256 _minTickets
@@ -50,7 +49,6 @@ contract RaffleFactory is Ownable {
         Raffle raffle = new Raffle(
             payable(msg.sender),
             _ticketFee,
-            _startTime,
             _endTime,
             _minTickets,
             _nftContract,
