@@ -12,7 +12,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 error InsufficientAmount();
 error InvalidTicketAmount();
 error RaffleOngoing();
-error RaffleClosed();
+error RaffleNotOpen();
 error ContractNotHoldingNFT();
 error InsufficientTicketsLeft();
 error InsufficientTicketsBought();
@@ -25,6 +25,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     // Raffle Content
     address payable public nftOwner;
     uint256 public immutable ticketFee;
+    uint256 public startTime;
     uint256 public endTime;
     uint256 public immutable minTickets;
     address public immutable nftContract;
@@ -54,6 +55,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     constructor(
         address payable _nftOwner,
         uint256 _ticketFee,
+        uint256 _startTime,
         uint256 _endTime,
         uint256 _minTickets,
         address _nftContract,
@@ -63,6 +65,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     ) Ownable() VRFConsumerBase(vrfCoordinator, linkToken) {
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
+        startTime = _startTime;
         endTime = _endTime;
         minTickets = _minTickets;
         nftContract = _nftContract;
@@ -105,8 +108,8 @@ contract Raffle is Ownable, VRFConsumerBase {
 
     // Enter the NFT raffle
     function enterRaffle(uint256 _numTickets) external payable nftHeld {
-        if (block.timestamp > endTime) {
-            revert RaffleClosed();
+        if (block.timestamp < startTime || block.timestamp > endTime) {
+            revert RaffleNotOpen();
         }
 
         if (_numTickets <= 0) {
