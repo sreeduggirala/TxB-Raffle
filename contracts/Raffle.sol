@@ -90,8 +90,8 @@ contract Raffle is Ownable, VRFConsumerBase {
     modifier vrfCalled() {
         if (randomNumberRequested == true) {
             revert WinnerAlreadyChosen();
-            _;
         }
+        _;
     }
 
     // Function only executes if minimum ticket threshold is met
