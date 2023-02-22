@@ -37,7 +37,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     uint256 internal fee;
     address internal vrfCoordinator;
     address internal linkToken;
-    uint256 internal randomNumber = type(uint256).max;
+    uint256 internal randomNumber;
     bool public randomNumberRequested;
 
     // Player Content
@@ -101,7 +101,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         _;
     }
 
-    // Enter the NFT raffle 
+    // Enter the NFT raffle
     function enterRaffle(uint256 _numTickets) external payable nftHeld {
         if (block.timestamp > endTime) {
             revert RaffleNotOpen();
@@ -162,12 +162,14 @@ contract Raffle is Ownable, VRFConsumerBase {
         bytes32 requestId,
         uint256 randomness
     ) internal override nftHeld enoughTickets {
-        randomNumber = randomness;
-
         if (address(this).balance == 0) {
             revert NoBalance();
         }
 
+        if (randomNumberRequested == false) {
+            revert RaffleOngoing();
+        }
+        randomNumber = randomness;
         winner = payable(players[randomNumber % players.length]);
         payable(nftOwner).transfer((address(this).balance * 975) / 1000);
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
