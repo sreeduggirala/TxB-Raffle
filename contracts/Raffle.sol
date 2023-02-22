@@ -26,6 +26,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     // Raffle Content
     address payable public nftOwner;
     uint256 public immutable ticketFee;
+    uint256 public immutable startTime;
     uint256 public immutable endTime;
     uint256 public immutable minTickets;
     address public immutable nftContract;
@@ -52,7 +53,8 @@ contract Raffle is Ownable, VRFConsumerBase {
     constructor(
         address payable _nftOwner,
         uint256 _ticketFee,
-        uint256 _endTime,
+        uint256 _timeUntilStart,
+        uint256 _duration,
         uint256 _minTickets,
         address _nftContract,
         uint256 _nftID,
@@ -61,7 +63,8 @@ contract Raffle is Ownable, VRFConsumerBase {
     ) Ownable() VRFConsumerBase(vrfCoordinator, linkToken) {
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
-        endTime = _endTime;
+        startTime = block.timestamp + _timeUntilStart;
+        endTime = block.timestamp + _duration;
         minTickets = _minTickets;
         nftContract = _nftContract;
         nftID = _nftID;
