@@ -39,7 +39,6 @@ contract Raffle is Ownable, VRFConsumerBase {
     address internal linkToken;
     uint256 internal randomNumber = type(uint256).max;
     bool public randomNumberRequested;
-    bool public randomNumberLoaded;
 
     // Player Content
     address payable[] public players;
@@ -164,7 +163,6 @@ contract Raffle is Ownable, VRFConsumerBase {
         uint256 randomness
     ) internal override nftHeld vrfCalled enoughTickets {
         randomNumber = randomness;
-        randomNumberLoaded = true;
 
         if (address(this).balance == 0) {
             revert NoBalance();
