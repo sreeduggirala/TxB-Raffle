@@ -161,7 +161,7 @@ contract Raffle is Ownable, VRFConsumerBase {
     function fulfillRandomness(
         bytes32 requestId,
         uint256 randomness
-    ) internal override nftHeld vrfCalled enoughTickets {
+    ) internal override nftHeld enoughTickets {
         randomNumber = randomness;
 
         if (address(this).balance == 0) {
