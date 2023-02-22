@@ -101,7 +101,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         _;
     }
 
-    // Enter the NFT raffle
+    // Enter the NFT raffle 
     function enterRaffle(uint256 _numTickets) external payable nftHeld {
         if (block.timestamp > endTime) {
             revert RaffleNotOpen();
