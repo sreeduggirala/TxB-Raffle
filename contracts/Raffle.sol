@@ -171,11 +171,31 @@ contract Raffle is Ownable, VRFConsumerBase {
             revert RaffleOngoing();
         }
         randomNumber = randomness;
-        winner = payable(players[randomNumber % players.length]);
+
+        uint i = 0;
+        uint256 totalBought;
+
+        //calculates total tickets bought
+        while (i < players.length) {
+            totalBought += playerTickets[players[i]];
+            i++;
+        }
+
+        randomNumber = randomNumber % totalBought;
+        uint256 ii;
+        while (ii < players.length) {
+            randomNumber -= playerTickets[players[ii]];
+
+            if (randomNumber <= 0) {
+                winner = payable(players[ii]);
+                break;
+            } else {
+                ii++;
+            }
+        }
         payable(nftOwner).transfer((address(this).balance * 975) / 1000);
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
         payable(owner()).transfer((address(this).balance)); // 2.5% commission of ticket fees
-        emit RaffleWinner(winner);
     }
 
     function deleteRaffle() external onlynftOwner nftHeld vrfCalled {
