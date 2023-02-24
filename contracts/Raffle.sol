@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.7;
+pragma solidity 0.8.18;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -104,8 +104,17 @@ contract Raffle is Ownable, VRFConsumerBase {
         _;
     }
 
+    modifier overCheck() {
+        if (block.timestamp > endTime || block.timestamp < startTime) {
+            revert RaffleNotOpen();
+        }
+        _;
+    }
+
     // Enter the NFT raffle
-    function enterRaffle(uint256 _numTickets) external payable nftHeld {
+    function enterRaffle(
+        uint256 _numTickets
+    ) external payable nftHeld overCheck {
         if (block.timestamp > endTime || block.timestamp < startTime) {
             revert RaffleNotOpen();
         }
@@ -158,6 +167,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         nftHeld
         enoughTickets
         vrfCalled
+        overCheck
         returns (bytes32 requestId)
     {
         randomNumberRequested = true;
