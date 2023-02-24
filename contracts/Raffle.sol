@@ -125,10 +125,16 @@ contract Raffle is Ownable, VRFConsumerBase {
     }
 
     function exitRaffle(uint256 _numTickets) external nftHeld vrfCalled {
-        if (playerTickets[msg.sender] < _numTickets) {
+        if (
+            playerTickets[msg.sender] < _numTickets ||
+            playerTickets[msg.sender] == 0
+        ) {
             revert InsufficientTicketsBought();
         }
 
+        if (_numTickets == 0) {
+            revert InvalidTicketAmount();
+        }
         uint256 i = 0;
         while (i < players.length) {
             if (players[i] != msg.sender) {
