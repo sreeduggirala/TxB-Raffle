@@ -7,12 +7,11 @@ TxB Raffle is an NFT raffling application with ticket purchase/refund and prize 
 # Key Features
 
 1. NFT owners can intiate raffles with custom slots, ticket prices, and start/end dates.
-2. Ticket are purchasable/refundable prior to end date.
+2. Ticket are purchasable/refundable prior to winner seelction.
 3. NFT owners can delete raffles prior to winner selection.
 4. VRF-based winner selection.
 5. NFT and ticket fee pool disbursement.
-6. Contract owner receives 2.5% commission.
-7. Contract ownership transferability.
+6. Vault contract (with ownership transferability) receives 3% commission.
 
 # Extensions/Modifications
 
@@ -21,4 +20,4 @@ TxB Raffle is an NFT raffling application with ticket purchase/refund and prize 
 
 Note: TxB Raffle is initialized to ETH Goerli Testnet; Chainlink content should be replaced with network-specific values.
 
-Chainlink doesn't support Shardeum (as of February 2023); a separe SupraOracles version will be made.
+Chainlink doesn't support Shardeum (as of February 2023); a separe SupraOracles version is available: https://github.com/sreeduggirala/TxB-Raffle-SO

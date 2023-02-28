@@ -47,9 +47,22 @@ contract Raffle is Ownable, VRFConsumerBase {
     mapping(address => uint256) public playerTickets;
 
     // Events
-    event RaffleEntered(address indexed player, uint256 numPurchased);
-    event RaffleRefunded(address indexed player, uint256 numRefunded);
-    event RaffleWinner(address indexed winner);
+    event RaffleEntered(
+        address indexed nftID,
+        address indexed player,
+        uint256 numPurchased
+    );
+    event RaffleRefunded(
+        address indexed nftID,
+        address indexed player,
+        uint256 numRefunded
+    );
+    event RaffleDeleted(address indexed nftID, address nftOwner);
+    event RaffleWon(
+        address indexed nftID,
+        address indexed winner,
+        uint256 randomNumber
+    );
 
     constructor(
         address payable _nftOwner,
@@ -147,7 +160,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         }
         ticketsBought = totalBought;
 
-        emit RaffleEntered(msg.sender, _numTickets);
+        emit RaffleEntered(nftID, msg.sender, _numTickets);
     }
 
     function exitRaffle(uint256 _numTickets) external nftHeld vrfCalled {
@@ -176,7 +189,7 @@ contract Raffle is Ownable, VRFConsumerBase {
             }
         }
 
-        emit RaffleRefunded(msg.sender, _numTickets);
+        emit RaffleRefunded(nftID, msg.sender, _numTickets);
     }
 
     function receiveRandomWinner()
@@ -221,7 +234,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         payable(nftOwner).transfer((address(this).balance * 975) / 1000);
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
         payable(owner()).transfer((address(this).balance)); // 2.5% commission of ticket fees
-        emit RaffleWinner(winner);
+        emit RaffleWon(nftID, winner, randomNumber);
     }
 
     function deleteRaffle() external onlynftOwner nftHeld vrfCalled {
@@ -232,5 +245,6 @@ contract Raffle is Ownable, VRFConsumerBase {
             payable(players[i]).transfer(ticketFee * playerTickets[players[i]]);
             i++;
         }
+        emit RaffleWon(nftID, winner, randomNumber);
     }
 }
