@@ -21,6 +21,7 @@ error WinnerAlreadyChosen();
 error OnlyNFTOwnerCanAccess();
 error NoBalance();
 error TooShort();
+error NotYourNFT();
 
 contract Raffle is Ownable, VRFConsumerBase {
     // Raffle Content
@@ -48,18 +49,25 @@ contract Raffle is Ownable, VRFConsumerBase {
 
     // Events
     event RaffleEntered(
-        address indexed nftID,
+        address indexed nftContract,
+        uint256 nftID,
         address indexed player,
         uint256 numPurchased
     );
     event RaffleRefunded(
-        address indexed nftID,
+        address indexed nftContract,
+        uint256 nftID,
         address indexed player,
         uint256 numRefunded
     );
-    event RaffleDeleted(address indexed nftID, address nftOwner);
+    event RaffleDeleted(
+        address indexed nftContract,
+        uint256 nftID,
+        address nftOwner
+    );
     event RaffleWon(
-        address indexed nftID,
+        address indexed nftContract,
+        uint256 nftID,
         address indexed winner,
         uint256 randomNumber
     );
@@ -75,6 +83,9 @@ contract Raffle is Ownable, VRFConsumerBase {
         bytes32 _keyHash,
         uint256 _fee
     ) Ownable() VRFConsumerBase(vrfCoordinator, linkToken) {
+        if (IERC721(_nftContract).ownerOf(_nftID) == _nftOwner) {
+            revert NotYourNFT();
+        }
         nftOwner = payable(_nftOwner);
         ticketFee = _ticketFee;
         startTime = block.timestamp + _timeUntilStart;
@@ -160,7 +171,7 @@ contract Raffle is Ownable, VRFConsumerBase {
         }
         ticketsBought = totalBought;
 
-        emit RaffleEntered(nftID, msg.sender, _numTickets);
+        emit RaffleEntered(nftContract, nftID, msg.sender, _numTickets);
     }
 
     function exitRaffle(uint256 _numTickets) external nftHeld vrfCalled {
@@ -189,7 +200,7 @@ contract Raffle is Ownable, VRFConsumerBase {
             }
         }
 
-        emit RaffleRefunded(nftID, msg.sender, _numTickets);
+        emit RaffleRefunded(nftContract, nftID, msg.sender, _numTickets);
     }
 
     function receiveRandomWinner()
@@ -231,10 +242,10 @@ contract Raffle is Ownable, VRFConsumerBase {
             }
         }
 
-        payable(nftOwner).transfer((address(this).balance * 975) / 1000);
+        payable(nftOwner).transfer((address(this).balance * 97) / 100);
         IERC721(nftContract).safeTransferFrom(address(this), winner, nftID);
-        payable(owner()).transfer((address(this).balance)); // 2.5% commission of ticket fees
-        emit RaffleWon(nftID, winner, randomNumber);
+        payable(owner()).transfer((address(this).balance)); // 3% commission of ticket fees
+        emit RaffleWon(nftContract, nftID, winner, randomNumber);
     }
 
     function deleteRaffle() external onlynftOwner nftHeld vrfCalled {
@@ -245,6 +256,7 @@ contract Raffle is Ownable, VRFConsumerBase {
             payable(players[i]).transfer(ticketFee * playerTickets[players[i]]);
             i++;
         }
-        emit RaffleWon(nftID, winner, randomNumber);
+
+        emit RaffleDeleted(nftContract, nftID, nftOwner);
     }
 }

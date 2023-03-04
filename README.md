@@ -20,4 +20,4 @@ TxB Raffle is an NFT raffling application with ticket purchase/refund and prize 
 
 Note: TxB Raffle is initialized to ETH Goerli Testnet; Chainlink content should be replaced with network-specific values.
 
-Chainlink doesn't support Shardeum (as of February 2023); a separe SupraOracles version is available: https://github.com/sreeduggirala/TxB-Raffle-SO
+Chainlink doesn't support Shardeum (as of February 2023): [SupraOracles Version](https://github.com/sreeduggirala/TxB-Raffle-SO)
