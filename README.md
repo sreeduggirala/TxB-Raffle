@@ -1,8 +1,6 @@
-# TxB Raffle (Chainlink Version)
+# Covet (Chainlink Version)
 
-TxB Raffle is an NFT raffling application with ticket purchase/refund and prize disbursement capabilities; random winner selection is ensured via verifiable random functions (VRFs).
-
-**This project was commissioned by Shardeum to TxB Labs (Texas Blockchain's Engineering Cohort at UT Austin).**
+Covet is an NFT raffling application with ticket purchase/refund and prize disbursement capabilities; random winner selection is ensured via verifiable random functions (VRFs).
 
 # Key Features
 
@@ -18,6 +16,4 @@ TxB Raffle is an NFT raffling application with ticket purchase/refund and prize 
 1. ERC-20 and ERC-1155 raffles
 2. Token-gated raffles
 
-Note: TxB Raffle is initialized to ETH Goerli Testnet; Chainlink content should be replaced with network-specific values.
-
-Chainlink doesn't support Shardeum (as of February 2023): [SupraOracles Version](https://github.com/sreeduggirala/TxB-Raffle-SO)
+Note: the smart contracts are initialized to ETH Goerli Testnet; Chainlink content should be replaced with network-specific values for mainnet deployment.
